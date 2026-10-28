@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestion des États des Lieux - SCI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @media print {
+      .no-print { display: none !important; }
+      .print-only { display: block !important; }
+      body { background: white; color: black; }
+    }
+    .signature-canvas {
+      touch-action: none;
+      border: 2px dashed #cbd5e1;
+      background-color: #f8fafc;
+      border-radius: 0.5rem;
+      cursor: crosshair;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 font-sans">
+
+  <!-- En-tête -->
+  <header class="bg-slate-900 text-white p-4 shadow-md no-print">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <h1 class="text-xl font-bold tracking-wide">Gestion des états des lieux et suivis des locataires</h1>
+      <span class="text-xs bg-slate-800 text-slate-300 px-3 py-1 rounded-full border border-slate-700">Gestion Immobilière</span>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
+
+    <!-- Encart Mandataire Commun -->
+    <div class="bg-white border border-slate-200 rounded-xl p-4 text-xs text-slate-600 space-y-1 shadow-sm no-print">
+      <div class="font-semibold text-slate-800 text-sm mb-1">Société de Gestion / Mandataire :</div>
+      <p><strong class="text-slate-700">GESTION FONCIÈRE ET IMMOBILIÈRE SARL</strong></p>
+      <p>30, rue du Tir, 78600 Maisons-Laffitte | SIREN : 390 308 153 (RCS Versailles)</p>
+      <p>Représentée par M. Jean-Philippe LAVAL | E-mail : jplaval64@gmail.com</p>
+      <p class="italic text-slate-500 mt-1">Agissant en tant que mandataire dûment mandaté pour le compte des SCI.</p>
+    </div>
+
+    <!-- PAGE ACCUEIL -->
+    <div id="step-home" class="space-y-6">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
+        <div class="space-y-2">
+          <span class="text-xs bg-blue-100 text-blue-800 font-semibold px-2.5 py-0.5 rounded">Module 1</span>
+          <h2 class="text-xl font-bold text-slate-900">Gestion des états des lieux</h2>
+          <p class="text-sm text-slate-500">Réalisez et enregistrez les constats d'entrée ou de sortie.</p>
+        </div>
+        <div class="space-y-3 pt-4 border-t border-slate-100">
+          <p class="text-xs font-semibold text-slate-700 uppercase tracking-wider">Sélectionnez la SCI :</p>
+          <div class="grid md:grid-cols-2 gap-3">
+            <button type="button" onclick="startEdlModule('SCI_1')" class="w-full text-left border border-slate-200 hover:border-blue-500 hover:bg-blue-50/30 p-4 rounded-xl transition-all flex justify-between items-center bg-white shadow-sm">
+              <div>
+                <strong class="block text-sm text-slate-900">SCI CLÉMENT ROSIERS</strong>
+                <span class="text-xs text-slate-500">33 rue des Rosiers & 1 rue JBC, Saint-Ouen</span>
+              </div>
+              <span class="text-blue-600 font-semibold text-sm">→</span>
+            </button>
+            <button type="button" onclick="startEdlModule('SCI_2')" class="w-full text-left border border-slate-200 hover:border-blue-500 hover:bg-blue-50/30 p-4 rounded-xl transition-all flex justify-between items-center bg-white shadow-sm">
+              <div>
+                <strong class="block text-sm text-slate-900">SCI AH</strong>
+                <span class="text-xs text-slate-500">19 & 21 rue Alphonse Helbronner</span>
+              </div>
+              <span class="text-blue-600 font-semibold text-sm">→</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
+        <div class="space-y-2">
+          <span class="text-xs bg-emerald-100 text-emerald-800 font-semibold px-2.5 py-0.5 rounded">Module 2</span>
+          <h2 class="text-xl font-bold text-slate-900">Suivi des locataires</h2>
+          <p class="text-sm text-slate-500">Consultez et gérez la liste de vos locataires par SCI.</p>
+        </div>
+        <div class="space-y-3 pt-4 border-t border-slate-100">
+          <p class="text-xs font-semibold text-slate-700 uppercase tracking-wider">Sélectionnez la SCI :</p>
+          <div class="grid md:grid-cols-2 gap-3">
+            <button type="button" onclick="openTenantList('SCI_1')" class="w-full text-left border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/30 p-4 rounded-xl transition-all flex justify-between items-center bg-white shadow-sm">
+              <div>
+                <strong class="block text-sm text-slate-900">SCI CLÉMENT ROSIERS</strong>
+                <span class="text-xs text-slate-500">Consulter les locataires (33 rue des Rosiers)</span>
+              </div>
+              <span class="text-emerald-600 font-semibold text-sm">→</span>
+            </button>
+            <button type="button" onclick="openTenantList('SCI_2')" class="w-full text-left border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/30 p-4 rounded-xl transition-all flex justify-between items-center bg-white shadow-sm">
+              <div>
+                <strong class="block text-sm text-slate-900">SCI AH</strong>
+                <span class="text-xs text-slate-500">Consulter les locataires (19 & 21 rue Alphonse Helbronner)</span>
+              </div>
+              <span class="text-emerald-600 font-semibold text-sm">→</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODULE 2 : LISTE LOCATAIRES (TABLEAU) -->
+    <section id="step-tenant-list" class="hidden bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
+      <div class="flex items-center justify-between border-b pb-4">
+        <div>
+          <span class="text-xs bg-emerald-100 text-emerald-800 font-medium px-2 py-0.5 rounded">Module 2</span>
+          <h2 class="text-2xl font-bold text-slate-900 mt-1" id="tenant-list-title">Liste des locataires</h2>
+        </div>
+        <button type="button" onclick="goBackToHome()" class="text-xs text-slate-500 hover:text-slate-800 underline">← Accueil</button>
+      </div>
+
+      <div class="flex flex-col md:flex-row gap-3 items-center justify-between">
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="exportTableToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-4 py-2 rounded-lg text-xs shadow-sm transition-all flex items-center gap-1.5">
+            📥 Exporter vers Excel (Affichage actuel)
+          </button>
+          <button type="button" onclick="resetTableFilters()" class="border border-slate-300 hover:bg-slate-50 text-slate-700 px-3 py-2 rounded-lg text-xs transition-all">
+            Réinitialiser les filtres
+          </button>
+        </div>
+        <span class="text-xs text-slate-500 italic">Filtrez chaque colonne via les listes déroulantes de l'en-tête</span>
+      </div>
+
+      <div class="overflow-x-auto border border-slate-200 rounded-xl">
+        <table id="tenant-table" class="w-full text-left border-collapse text-xs">
+          <thead class="bg-slate-900 text-white uppercase text-[10px] tracking-wider">
+            <tr>
+              <th class="p-3 border-r border-slate-700">
+                <div class="font-bold mb-1">Appartement</div>
+                <select id="filter-appartement" onchange="filterTenantTable()" class="w-full text-slate-800 font-normal p-1 rounded text-[11px] bg-white border"><option value="">-- Tous --</option></select>
+              </th>
+              <th class="p-3 border-r border-slate-700">
+                <div class="font-bold mb-1">Date d'entrée</div>
+                <select id="filter-dateEntree" onchange="filterTenantTable()" class="w-full text-slate-800 font-normal p-1 rounded text-[11px] bg-white border"><option value="">-- Toutes --</option></select>
+              </th>
+              <th class="p-3 border-r border-slate-700">
+                <div class="font-bold mb-1">Occupant(s)</div>
+                <select id="filter-occupant" onchange="filterTenantTable()" class="w-full text-slate-800 font-normal p-1 rounded text-[11px] bg-white border"><option value="">-- Tous --</option></select>
+              </th>
+              <th class="p-3 border-r border-slate-700">
+                <div class="font-bold mb-1">N° de téléphone</div>
+                <select id="filter-tel" onchange="filterTenantTable()" class="w-full text-slate-800 font-normal p-1 rounded text-[11px] bg-white border"><option value="">-- Tous --</option></select>
+              </th>
+              <th class="p-3 border-r border-slate-700">
+                <div class="font-bold mb-1">Adresse mail</div>
+                <select id="filter-email" onchange="filterTenantTable()" class="w-full text-slate-800 font-normal p-1 rounded text-[11px] bg-white border"><option value="">-- Tous --</option></select>
+              </th>
+              <th class="p-3 border-r border-slate-700">
+                <div class="font-bold mb-1">Date de sortie</div>
+                <select id="filter-dateSortie" onchange="filterTenantTable()" class="w-full text-slate-800 font-normal p-1 rounded text-[11px] bg-white border"><option value="">-- Toutes --</option></select>
+              </th>
+              <th class="p-3 border-r border-slate-700">EDL Entrée (Signé)</th>
+              <th class="p-3">EDL Sortie (Signé)</th>
+            </tr>
+          </thead>
+          <tbody id="tenant-table-body" class="divide-y divide-slate-200 bg-white">
+            <!-- Injecté dynamiquement -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- CONFIGURATION IMMEUBLE & TYPE -->
+    <section id="step-building" class="hidden bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+        <div>
+          <span id="selected-sci-badge" class="text-xs bg-blue-100 text-blue-800 font-medium px-2.5 py-0.5 rounded">SCI</span>
+          <h2 class="text-2xl font-bold text-slate-900 mt-1" id="selected-sci-name">Configuration du Constat</h2>
+        </div>
+        <button type="button" onclick="goBackToHome()" class="text-xs text-slate-500 hover:text-slate-800 underline">← Accueil</button>
+      </div>
+
+      <div id="building-selection-block" class="space-y-3">
+        <h3 class="text-sm font-semibold text-slate-800">1. Sélectionnez l'immeuble concerné :</h3>
+        <div class="grid md:grid-cols-2 gap-3">
+          <label class="border rounded-lg p-4 cursor-pointer hover:bg-slate-50 flex items-center space-x-3 border-slate-200">
+            <input type="radio" name="building_address" value="19 rue Alphonse Helbronner, 93400 Saint-Ouen-sur-Seine" onchange="onAddressSelected()" class="text-blue-600 focus:ring-blue-500">
+            <span class="text-sm font-medium text-slate-800">19, rue Alphonse Helbronner, Saint-Ouen</span>
+          </label>
+          <label class="border rounded-lg p-4 cursor-pointer hover:bg-slate-50 flex items-center space-x-3 border-slate-200">
+            <input type="radio" name="building_address" value="21 rue Alphonse Helbronner, 93400 Saint-Ouen-sur-Seine" onchange="onAddressSelected()" class="text-blue-600 focus:ring-blue-500">
+            <span class="text-sm font-medium text-slate-800">21, rue Alphonse Helbronner, Saint-Ouen</span>
+          </label>
+        </div>
+      </div>
+
+      <div id="building-fixed-block" class="hidden bg-slate-50 border border-slate-200 rounded-lg p-4 text-sm">
+        <span class="text-xs text-slate-500 block">Adresse de l'immeuble :</span>
+        <strong class="text-slate-800 text-base" id="fixed-address-text">33 rue des Rosiers & 1 rue JBC, 93400 Saint-Ouen-sur-Seine</strong>
+      </div>
+
+      <div class="space-y-3 pt-2">
+        <h3 class="text-sm font-semibold text-slate-800">2. Sélectionnez le type d'état des lieux :</h3>
+        <div class="grid grid-cols-2 gap-4">
+          <button type="button" onclick="setEdlType('Entrée')" id="btn-type-entrée" class="border-2 border-slate-200 hover:border-emerald-500 p-4 rounded-xl text-center space-y-1 transition-all">
+            <div class="text-lg font-bold text-emerald-700">ENTRÉE</div>
+            <div class="text-xs text-slate-500">Arrivée d'un locataire</div>
+          </button>
+          <button type="button" onclick="setEdlType('Sortie')" id="btn-type-sortie" class="border-2 border-slate-200 hover:border-amber-500 p-4 rounded-xl text-center space-y-1 transition-all">
+            <div class="text-lg font-bold text-amber-700">SORTIE</div>
+            <div class="text-xs text-slate-500">Départ du locataire</div>
+          </button>
+        </div>
+      </div>
+
+      <div class="pt-4 flex justify-between">
+        <button type="button" onclick="goBackToHome()" class="text-slate-600 border px-4 py-2 rounded-lg text-sm">← Retour</button>
+        <button type="button" onclick="proceedToLogement()" id="btn-next-step" disabled class="bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium px-6 py-2.5 rounded-lg shadow-sm transition-all">
+          Continuer vers le logement →
+        </button>
+      </div>
+    </section>
+
+    <!-- SÉLECTION LOGEMENT -->
+    <section id="step-logement" class="hidden bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+        <div>
+          <span class="text-xs bg-blue-100 text-blue-800 font-medium px-2.5 py-0.5 rounded">Étape 3</span>
+          <h2 class="text-2xl font-bold text-slate-900 mt-1">Sélection du Logement / Lot</h2>
+        </div>
+        <button type="button" onclick="goBackToBuilding()" class="text-xs text-slate-500 hover:text-slate-800 underline">← Retour</button>
+      </div>
+
+      <div class="space-y-3">
+        <label class="block text-sm font-semibold text-slate-800">Choisissez le logement concerné :</label>
+        <select id="logement-select" class="w-full border-slate-300 rounded-lg p-3 border bg-white focus:ring-2 focus:ring-blue-500 text-sm">
+          <option value="">-- Sélectionnez un logement --</option>
+        </select>
+      </div>
+
+      <div class="pt-4 flex justify-between">
+        <button type="button" onclick="goBackToBuilding()" class="text-slate-600 border px-4 py-2 rounded-lg text-sm">← Retour</button>
+        <button type="button" onclick="proceedToTenant()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2.5 rounded-lg shadow-sm transition-all">
+          Continuer vers le locataire →
+        </button>
+      </div>
+    </section>
+
+    <!-- GESTION LOCATAIRE -->
+    <section id="step-tenant" class="hidden bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+        <div>
+          <span class="text-xs bg-blue-100 text-blue-800 font-medium px-2.5 py-0.5 rounded">Étape 4</span>
+          <h2 class="text-2xl font-bold text-slate-900 mt-1">Sélection ou Ajout des Locataires</h2>
+        </div>
+        <button type="button" onclick="goBackToLogement()" class="text-xs text-slate-500 hover:text-slate-800 underline">← Retour</button>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-4">
+        <div onclick="setTenantMode('existing')" id="card-mode-existing" class="border-2 border-slate-200 hover:border-blue-500 p-4 rounded-xl cursor-pointer transition-all space-y-1">
+          <div class="font-bold text-slate-900 text-base">Sélectionner dans la liste</div>
+          <p class="text-xs text-slate-500">Cochez un ou plusieurs locataires existants.</p>
+        </div>
+        <div onclick="setTenantMode('new')" id="card-mode-new" class="border-2 border-slate-200 hover:border-blue-500 p-4 rounded-xl cursor-pointer transition-all space-y-1">
+          <div class="font-bold text-slate-900 text-base">Créer un nouveau locataire</div>
+          <p class="text-xs text-slate-500">Saisir les coordonnées (colocataires pris en compte).</p>
+        </div>
+      </div>
+
+      <!-- Mode Existant -->
+      <div id="block-existing-tenant" class="hidden space-y-3 pt-2">
+        <label class="block text-sm font-semibold text-slate-800">Cochez le ou les locataires concernés :</label>
+        <div id="existing-tenants-checkboxes" class="max-h-60 overflow-y-auto border border-slate-200 rounded-lg p-3 space-y-2 bg-slate-50">
+          <!-- Injecté dynamiquement -->
+        </div>
+      </div>
+
+      <!-- Mode Nouveau -->
+      <div id="block-new-tenant" class="hidden space-y-4 pt-2 border-t border-slate-100">
+        <h3 class="text-sm font-semibold text-slate-800">Formulaire de création du locataire :</h3>
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1">Civilité / Type</label>
+          <select id="tenant-civility" onchange="onCivilityChange()" class="w-full border-slate-300 rounded-lg p-2.5 border bg-white focus:ring-2 focus:ring-blue-500 text-sm">
+            <option value="Mr">Mr</option>
+            <option value="Mme">Mme</option>
+            <option value="Mr et Mme">Mr et Mme</option>
+            <option value="Mr et Mr">Mr et Mr</option>
+            <option value="Mme et Mme">Mme et Mme</option>
+            <option value="Personne morale">Personne morale</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm bg-slate-50 p-4 rounded-lg border">
+          <div class="md:col-span-2 font-semibold text-slate-700 text-xs uppercase" id="label-loc-1">Coordonnées du locataire</div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">Nom <span class="text-red-500">*</span></label>
+            <input type="text" id="t-nom-1" class="w-full border-slate-300 rounded-lg p-2.5 border bg-white uppercase" placeholder="NOM">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">Prénom <span class="text-red-500">*</span></label>
+            <input type="text" id="t-prenom-1" class="w-full border-slate-300 rounded-lg p-2.5 border bg-white capitalize" placeholder="Prénom">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">Téléphone</label>
+            <input type="tel" id="t-tel-1" class="w-full border-slate-300 rounded-lg p-2.5 border bg-white" placeholder="0612345678">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">Adresse e-mail</label>
+            <input type="email" id="t-email-1" class="w-full border-slate-300 rounded-lg p-2.5 border bg-white" placeholder="email@domaine.com">
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-xs font-medium text-slate-700 mb-1">Adresse actuelle</label>
+            <input type="text" id="t-adresse-1" class="w-full border-slate-300 rounded-lg p-2.5 border bg-white" placeholder="Adresse actuelle">
+          </div>
+        </div>
+
+        <div id="block-coloc-2" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 text-sm bg-slate-50 p-4 rounded-lg border">
+          <div class="md:col-span-2 font-semibold text-slate-700 text-xs uppercase">Coordonnées du second colocataire</div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">Nom <span class="text-red-500">*</span></label>
+            <input type="text" id="t-nom-2" class="w-full border-slate-300 rounded-lg p-2.5 border bg-white uppercase" placeholder="NOM">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">Prénom <span class="text-red-500">*</span></label>
+            <input type="text" id="t-prenom-2" class="w-full border-slate-300 rounded-lg p-2.5 border bg-white capitalize" placeholder="Prénom">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">Téléphone</label>
+            <input type="tel" id="t-tel-2" class="w-full border-slate-300 rounded-lg p-2.5 border bg-white" placeholder="0612345678">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">Adresse e-mail</label>
+            <input type="email" id="t-email-2" class="w-full border-slate-300 rounded-lg p-2.5 border bg-white" placeholder="email@domaine.com">
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-xs font-medium text-slate-700 mb-1">Adresse actuelle</label>
+            <input type="text" id="t-adresse-2" class="w-full border-slate-300 rounded-lg p-2.5 border bg-white" placeholder="Adresse actuelle">
+          </div>
+        </div>
+
+        <div id="fields-pm" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 text-sm bg-slate-50 p-4 rounded-lg border">
+          <div class="md:col-span-2 font-semibold text-slate-700 text-xs uppercase">Personne Morale</div>
+          <div class="md:col-span-2">
+            <label class="block text-xs font-medium text-slate-700 mb-1">Société <span class="text-red-500">*</span></label>
+            <input type="text" id="pm-societe" class="w-full border-slate-300 rounded-lg p-2.5 border uppercase" placeholder="SOCIÉTÉ">
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-xs font-medium text-slate-700 mb-1">Siège social</label>
+            <input type="text" id="pm-siege" class="w-full border-slate-300 rounded-lg p-2.5 border" placeholder="Adresse siège">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">Nom du représentant <span class="text-red-500">*</span></label>
+            <input type="text" id="pm-nom" class="w-full border-slate-300 rounded-lg p-2.5 border uppercase" placeholder="NOM">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">Prénom du représentant <span class="text-red-500">*</span></label>
+            <input type="text" id="pm-prenom" class="w-full border-slate-300 rounded-lg p-2.5 border capitalize" placeholder="Prénom">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">Téléphone</label>
+            <input type="tel" id="pm-tel" class="w-full border-slate-300 rounded-lg p-2.5 border" placeholder="Téléphone">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">E-mail</label>
+            <input type="email" id="pm-email" class="w-full border-slate-300 rounded-lg p-2.5 border" placeholder="Email">
+          </div>
+        </div>
+
+        <div class="pt-2 flex items-center gap-3">
+          <button type="button" onclick="saveNewTenant()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-4 py-2 rounded-lg text-sm shadow-sm transition-all">
+            💾 Enregistrer ce locataire
+          </button>
+          <span id="save-feedback" class="text-xs text-emerald-600 font-semibold hidden">✓ Locataire enregistré ! Vous pouvez continuer.</span>
+        </div>
+      </div>
+
+      <div class="pt-4 flex justify-between">
+        <button type="button" onclick="goBackToLogement()" class="text-slate-600 border px-4 py-2 rounded-lg text-sm">← Retour</button>
+        <button type="button" onclick="promptInspectionSource()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2.5 rounded-lg shadow-sm transition-all">
+          Commencer le constat →
+        </button>
+      </div>
+    </section>
+
+    <!-- MODAL CHOIX TRAME -->
+    <div id="modal-trame" class="hidden fixed inset-0 bg-slate-900/50 flex items-center justify-center p-4 z-50">
+      <div class="bg-white rounded-xl shadow-lg max-w-md w-full p-6 space-y-4">
+        <h3 class="text-lg font-bold text-slate-900">Origine du constat</h3>
+        <p class="text-sm text-slate-600">Comment souhaitez-vous initialiser cet état des lieux ?</p>
+        <div class="space-y-3 pt-2">
+          <button type="button" onclick="initInspection('vierge')" class="w-full text-left border rounded-lg p-4 hover:bg-slate-50 border-slate-200">
+            <strong class="block text-sm text-slate-900">Créer un état des lieux vierge</strong>
+          </button>
+          <button type="button" onclick="initInspection('precedent')" class="w-full text-left border rounded-lg p-4 hover:bg-slate-50 border-slate-200">
+            <strong class="block text-sm text-slate-900">Repartir du constat précédent</strong>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ÉTAPE CONSTAT -->
+    <section id="step-inspection" class="hidden space-y-6">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
+        <div class="flex justify-between items-center border-b pb-4 no-print">
+          <button type="button" onclick="goBackToTenant()" class="text-xs text-slate-500 underline">← Retour</button>
+          <h2 class="text-xl font-bold text-slate-900">Constat d'état des lieux (<span id="insp-type-label"></span>)</h2>
+        </div>
+
+        <div id="doc-title-banner" class="hidden print-only text-center font-bold text-base border-b pb-2 mb-4"></div>
+
+        <!-- Cartouche Général -->
+        <div class="bg-slate-50 p-4 rounded-lg border space-y-3 text-xs text-slate-700">
+          <div class="font-semibold text-slate-900 text-sm mb-1">Informations générales du constat</div>
+          <div class="grid md:grid-cols-2 gap-3">
+            <p><strong>Adresse du bien :</strong> <span id="cart-adresse"></span></p>
+            <p><strong>Propriétaire (SCI) :</strong> <span id="cart-sci"></span><br><span id="cart-siege" class="text-slate-500"></span></p>
+            <p><strong>Locataire(s) :</strong> <span id="cart-locataire"></span></p>
+            <div id="cart-nouvelle-adresse-box" class="hidden">
+              <label class="block font-semibold mb-1">Nouvelle adresse du locataire (Sortie) :</label>
+              <input type="text" id="input-nouvelle-adresse" class="w-full border rounded p-1.5 bg-white" placeholder="Adresse de réacheminement">
+            </div>
+            <p><strong>Réalisé par :</strong> <input type="text" id="cart-operateur" value="M. Hervé LAVAL" class="w-full border rounded p-1 bg-white"></p>
+            <p><strong>Date :</strong> <input type="date" id="cart-date" class="border rounded p-1 bg-white"></p>
+          </div>
+        </div>
+
+        <!-- Cartouche 1 : Compteurs -->
+        <div class="border rounded-xl p-4 space-y-4">
+          <h3 class="font-bold text-slate-900 text-base">1. Compteurs Énergie</h3>
+          <div class="grid md:grid-cols-2 gap-4 text-xs">
+            <div class="border p-3 rounded-lg space-y-2 bg-slate-50/50">
+              <span class="font-bold text-slate-800 block">Compteur Électricité Linky</span>
+              <input type="text" placeholder="Numéro de compteur" class="w-full border rounded p-2 bg-white">
+              <input type="text" placeholder="Relevé (kWh)" class="w-full border rounded p-2 bg-white">
+              <div class="flex gap-2">
+                <input type="file" accept="image/*" multiple class="w-full text-xs">
+                <button type="button" onclick="alert('Ouverture caméra...')" class="bg-slate-800 text-white px-3 py-1 rounded text-xs whitespace-nowrap">📷 Photo</button>
+              </div>
+            </div>
+            <div class="border p-3 rounded-lg space-y-2 bg-slate-50/50">
+              <span class="font-bold text-slate-800 block">Compteur Gaz</span>
+              <input type="text" placeholder="Numéro de compteur" class="w-full border rounded p-2 bg-white">
+              <input type="text" placeholder="Relevé" class="w-full border rounded p-2 bg-white">
+              <div class="flex gap-2">
+                <input type="file" accept="image/*" multiple class="w-full text-xs">
+                <button type="button" onclick="alert('Ouverture caméra...')" class="bg-slate-800 text-white px-3 py-1 rounded text-xs whitespace-nowrap">📷 Photo</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cartouche 2 : Clés -->
+        <div class="border rounded-xl p-4 space-y-4">
+          <h3 class="font-bold text-slate-900 text-base">2. Clés et Accès</h3>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
+            <div><label class="block font-medium mb-1">Porte principale</label><input type="number" min="0" value="0" class="w-full border rounded p-2"></div>
+            <div><label class="block font-medium mb-1">Parties communes</label><input type="number" min="0" value="0" class="w-full border rounded p-2"></div>
+            <div><label class="block font-medium mb-1">Boîte aux lettres</label><input type="number" min="0" value="0" class="w-full border rounded p-2"></div>
+            <div id="sci-ah-keys-1" class="hidden"><label class="block font-medium mb-1">Badges Vigik</label><input type="number" min="0" value="0" class="w-full border rounded p-2"></div>
+            <div id="sci-ah-keys-2" class="hidden"><label class="block font-medium mb-1">Visiophone</label><select class="w-full border rounded p-2 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div>
+          </div>
+          <input type="text" placeholder="Notes sur les clés et accès (1 ligne)..." class="w-full border rounded p-1.5 bg-white text-xs mt-2">
+        </div>
+
+        <!-- Cartouche 3 : Chauffage & Eau Chaude -->
+        <div class="border rounded-xl p-4 space-y-4">
+          <h3 class="font-bold text-slate-900 text-base">3. Chauffage et Production d'Eau Chaude</h3>
+          <div id="chauffage-container" class="text-xs space-y-3"></div>
+        </div>
+
+        <!-- Cartouche 4 : Détecteur de fumée -->
+        <div class="border rounded-xl p-4 space-y-4 text-xs">
+          <h3 class="font-bold text-slate-900 text-base">4. Détecteur de Fumée</h3>
+          <div class="grid md:grid-cols-2 gap-3">
+            <div><label class="block font-medium mb-1">Emplacement</label><input type="text" class="w-full border rounded p-2"></div>
+            <div><label class="block font-medium mb-1">État</label><select class="w-full border rounded p-2 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div>
+            <div><label class="block font-medium mb-1">Dégradation</label><input type="text" class="w-full border rounded p-2"></div>
+            <div><label class="block font-medium mb-1">Notes</label><input type="text" class="w-full border rounded p-2"></div>
+          </div>
+          <div class="flex gap-2 pt-2">
+            <input type="file" accept="image/*" multiple class="w-full text-xs">
+            <button type="button" onclick="alert('Ouverture caméra...')" class="bg-slate-800 text-white px-3 py-1 rounded text-xs whitespace-nowrap">📷 Photo</button>
+          </div>
+        </div>
+
+        <!-- Cartouche 5 : Boîte aux lettres -->
+        <div class="border rounded-xl p-4 space-y-4 text-xs">
+          <h3 class="font-bold text-slate-900 text-base">5. Boîte aux Lettres</h3>
+          <div class="grid md:grid-cols-3 gap-3">
+            <div><label class="block font-medium mb-1">État</label><select class="w-full border rounded p-2 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div>
+            <div><label class="block font-medium mb-1">Dégradation</label><input type="text" class="w-full border rounded p-2"></div>
+            <div><label class="block font-medium mb-1">Notes</label><input type="text" class="w-full border rounded p-2"></div>
+          </div>
+        </div>
+
+        <!-- DESCRIPTION DÉTAILLÉE PAR PIÈCES -->
+        <div id="pieces-container" class="space-y-6 pt-4"></div>
+
+        <!-- REMARQUES GÉNÉRALES -->
+        <div class="border rounded-xl p-4 space-y-2 text-xs">
+          <h3 class="font-bold text-slate-900 text-base">Remarques Générales</h3>
+          <textarea rows="4" placeholder="Saisissez ici toute remarque ou observation complémentaire..." class="w-full border rounded p-2 bg-white"></textarea>
+        </div>
+
+        <!-- SECTION SIGNATURES ET VALIDATION -->
+        <div id="section-signatures" class="border-t-2 border-dashed border-slate-300 pt-6 space-y-6">
+          <h3 class="font-bold text-slate-900 text-lg">Validation et Signatures Contradictoires</h3>
+          <p class="text-xs text-slate-500">En signant ci-dessous, le bailleur et le locataire certifient l'exactitude des constatations ci-dessus.</p>
+
+          <div class="grid md:grid-cols-2 gap-6">
+            <!-- Signature Bailleur -->
+            <div class="border p-4 rounded-xl space-y-2 bg-slate-50">
+              <div class="flex justify-between items-center">
+                <span class="font-bold text-xs text-slate-800">Signature du Mandataire / Bailleur</span>
+                <button type="button" onclick="clearSignature('canvas-bailleur')" id="btn-clear-bailleur" class="text-[10px] text-red-600 underline no-print">Effacer</button>
+              </div>
+              <canvas id="canvas-bailleur" class="signature-canvas w-full h-32" width="350" height="130"></canvas>
+            </div>
+
+            <!-- Signature Locataire -->
+            <div class="border p-4 rounded-xl space-y-2 bg-slate-50">
+              <div class="flex justify-between items-center">
+                <span class="font-bold text-xs text-slate-800">Signature du Locataire</span>
+                <button type="button" onclick="clearSignature('canvas-locataire')" id="btn-clear-locataire" class="text-[10px] text-red-600 underline no-print">Effacer</button>
+              </div>
+              <canvas id="canvas-locataire" class="signature-canvas w-full h-32" width="350" height="130"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Boutons d'action -->
+        <div class="pt-6 flex justify-between no-print">
+          <button type="button" onclick="goBackToTenant()" id="btn-inspect-back" class="text-slate-600 border px-4 py-2 rounded-lg text-sm">← Retour</button>
+          
+          <div class="space-x-3">
+            <button type="button" id="btn-validate-seal" onclick="validateAndSignInspection()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-6 py-2.5 rounded-lg text-sm shadow-sm transition-all">
+              ✅ 1. Valider et sceller définitivement
+            </button>
+            <button type="button" id="btn-print-pdf" onclick="window.print()" class="hidden bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2.5 rounded-lg text-sm shadow-sm transition-all">
+              🖨️ 2. Imprimer / Enregistrer en PDF
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    var LOGEMENTS_DATA = {
+      "21 rue Alphonse Helbronner, 93400 Saint-Ouen-sur-Seine": ["F3 rez-de-chaussée", "F3 1er étage gauche", "F2 1er étage droite", "F3 2ème étage gauche", "F2 2ème étage droite", "F3 3ème étage droite", "F4 3ème étage gauche"],
+      "19 rue Alphonse Helbronner, 93400 Saint-Ouen-sur-Seine": ["Studio sur rue", "Studio sur cour", "F2 fond de cour", "F2 cour accès par le 19", "F3 1er étage", "F3 2ème étage"],
+      "33 rue des Rosiers, 93400 Saint-Ouen-sur-Seine": ["Boutique Rdc", "Appartement 1er étage droite", "Appartement 1er étage gauche", "Appartement 2ème étage droite", "Appartement 2ème étage couloir droite", "Appartement 2ème étage couloir gauche", "Appartement 3ème étage droite", "Appartement 3ème étage couloir droite", "Appartement 3ème étage couloir gauche", "Appartement 4ème étage droite", "Appartement 4ème étage couloir droite", "Appartement 4ème étage couloir gauche", "Appartement 5ème étage droite", "Appartement 5ème étage couloir droite", "Appartement 5ème étage couloir gauche", "Pavillon 1 rue JBC"]
+    };
+
+    var SCI_DATA = {
+      SCI_1: { nom: "SCI CLÉMENT ROSIERS", prefix: "CR", siege: "33 rue des Rosiers, 93400 Saint-Ouen-sur-Seine", adresseFixe: "33 rue des Rosiers, 93400 Saint-Ouen-sur-Seine" },
+      SCI_2: { nom: "SCI AH", prefixAH19: "AH19", prefixAH21: "AH21", siege: "33 rue des Rosiers, 93400 Saint-Ouen-sur-Seine" }
+    };
+
+    var savedTenants = {
+      SCI_1: [
+        { appartement: "Boutique Rdc", dateEntree: "", label: "Société LOCLA", tel: "", email: "", dateSortie: "" },
+        { appartement: "Appartement 1er étage droite", dateEntree: "", label: "Vide", tel: "", email: "", dateSortie: "" },
+        { appartement: "Appartement 1er étage gauche", dateEntree: "", label: "Thomas LESIGNE & Karolina ORZELEL", tel: "06 17 13 38 70 / 06 25 36 62 87", email: "lesignethomas@gmail.com", dateSortie: "" },
+        { appartement: "Appartement 2ème étage droite", dateEntree: "", label: "Nicolas Olivares", tel: "07 81 15 92 47", email: "nico.olivares@gmail.com", dateSortie: "" },
+        { appartement: "Appartement 2ème étage couloir droite", dateEntree: "", label: "Ioanna MAROUGKA & Kallioppi GARDERI", tel: "07 51 26 31 40", email: "joemarougka@gmail.com", dateSortie: "" },
+        { appartement: "Appartement 2ème étage couloir gauche", dateEntree: "", label: "Paul Etienne GARDE", tel: "06 78 94 26 35", email: "garde.pauletienne@hotmail.fr", dateSortie: "" },
+        { appartement: "Appartement 3ème étage droite", dateEntree: "", label: "Idea THORRUD & Lully GASTER", tel: "07 66 03 88 74", email: "lullygaster@gmail.com", dateSortie: "" },
+        { appartement: "Appartement 3ème étage couloir droite", dateEntree: "", label: "Elodie LAVAL", tel: "06 60 68 23 57", email: "", dateSortie: "" },
+        { appartement: "Appartement 3ème étage couloir gauche", dateEntree: "", label: "Mlle Simona SAJEVA", tel: "06 38 91 48 10", email: "info@simonasajeva.com", dateSortie: "" },
+        { appartement: "Appartement 4ème étage droite", dateEntree: "", label: "Ludovic HOUMEAU & Lolita PENARRUBIA MARCOS", tel: "06 29 58 70 87", email: "mathieu.houmeau@yahoo.fr", dateSortie: "" },
+        { appartement: "Appartement 4ème étage couloir droite", dateEntree: "", label: "Morgan DERRIEN", tel: "06 65 18 67 91", email: "morgan1derrien@gmail.com", dateSortie: "" },
+        { appartement: "Appartement 4ème étage couloir gauche", dateEntree: "", label: "Sthéphano LA ROSA", tel: "06 64 82 24 27", email: "contact-uz6rssatq@messagerie.leboncoin.fr", dateSortie: "" },
+        { appartement: "Appartement 5ème étage droite", dateEntree: "", label: "Céline REYMOND", tel: "07 62 66 44 73", email: "clemencon.reymond@gmail.com", dateSortie: "" },
+        { appartement: "Appartement 5ème étage couloir droite", dateEntree: "", label: "M Maxime LAVAL", tel: "06 68 41 51 98", email: "", dateSortie: "" },
+        { appartement: "Appartement 5ème étage couloir gauche", dateEntree: "", label: "M. Catalin BINDIU", tel: "07 58 33 56 66", email: "catalin.bindiu98@gmail.com", dateSortie: "" },
+        { appartement: "Pavillon 1 rue JBC", dateEntree: "", label: "Mme Maud Pannetier & Thomas Harel", tel: "06 83 23 58 93 / 06 71 87 76 56", email: "maudpannetier@hotmail.fr", dateSortie: "" }
+      ],
+      SCI_2: [
+        { appartement: "F3 rez-de-chaussée (21)", dateEntree: "", label: "Catherine ROUDE", tel: "06 66 27 75 01", email: "catherine.roude@gmail.com", dateSortie: "" },
+        { appartement: "F3 1er étage droite (21)", dateEntree: "", label: "Pierre Fournier", tel: "07 78 04 92 61", email: "pro.pierrefournier@gmail.com", dateSortie: "" },
+        { appartement: "F3 1er étage gauche (21)", dateEntree: "", label: "Kevin GUIBOUX & Julie Wolff", tel: "06 34 08 52 28 / 07 52 38 63 74", email: "giboux.kevin@gmail.com", dateSortie: "" },
+        { appartement: "F2 2ème étage droite (21)", dateEntree: "", label: "Eliot DUBUS & Océane BLARET", tel: "06 69 39 51 88", email: "eliott.dubus@gmail.com", dateSortie: "" },
+        { appartement: "F3 2ème étage gauche (21)", dateEntree: "", label: "Damien GRANAT & Alexandre HERMELLIN", tel: "06 31 94 41 51 / 06 12 60 39 45", email: "granat.damien@orange.fr", dateSortie: "" },
+        { appartement: "F3 3ème étage droite (21)", dateEntree: "", label: "Adeline KIKUDJI", tel: "06 62 08 23 42", email: "saladji@outlook.fr", dateSortie: "" },
+        { appartement: "F4 3ème étage gauche (21)", dateEntree: "", label: "Patrick BITAR & Clara BITAR", tel: "06 22 54 23 00 / 06 82 17 49 28", email: "oraetlabora7@free.fr", dateSortie: "" },
+        { appartement: "F2 fond de cour (19)", dateEntree: "", label: "Joella VARASOA", tel: "06 59 43 00 98", email: "joella.varasoa@icloud.com", dateSortie: "" },
+        { appartement: "F2 cour accès par le 19", dateEntree: "", label: "Lucie ALAPETITE", tel: "06 33 51 48 87", email: "oraetlabora7@free.fr", dateSortie: "" },
+        { appartement: "Studio sur rue (19)", dateEntree: "", label: "Yoan Robert NAUDIN", tel: "07 49 44 38 49", email: "yrobertnaudin@gmail.com", dateSortie: "" },
+        { appartement: "Studio sur cour (19)", dateEntree: "", label: "Aymeric TRIONFO", tel: "07 66 06 16 54", email: "trionfoaymeric@gmail.com", dateSortie: "" },
+        { appartement: "F3 1er étage (19)", dateEntree: "", label: "Chloé MEUDEC-CUTTING & Fadwa CHAID", tel: "06 56 66 31 22 / 06 10 62 36 45", email: "cloemeudec-cutting@outlook.com", dateSortie: "" }
+      ]
+    };
+
+    var selectedSciKey = null;
+    var selectedAddress = null;
+    var selectedEdlType = null;
+    var selectedLogement = null;
+    var tenantMode = null;
+    var currentTenantDataList = [];
+
+    function formatName(str) { return str ? str.trim().toUpperCase() : ''; }
+    function formatFirstName(str) { return str ? str.trim().charAt(0).toUpperCase() + str.trim().slice(1).toLowerCase() : ''; }
+
+    function startEdlModule(sciKey) {
+      selectedSciKey = sciKey;
+      selectedAddress = null; selectedEdlType = null; selectedLogement = null;
+      document.getElementById('step-home').classList.add('hidden');
+      document.getElementById('step-building').classList.remove('hidden');
+
+      var sci = SCI_DATA[sciKey];
+      document.getElementById('selected-sci-name').innerText = sci.nom + " - Configuration";
+      document.getElementById('selected-sci-badge').innerText = sci.nom;
+
+      if(sciKey === 'SCI_1') {
+        selectedAddress = sci.adresseFixe;
+        document.getElementById('building-selection-block').classList.add('hidden');
+        document.getElementById('building-fixed-block').classList.remove('hidden');
+        document.getElementById('fixed-address-text').innerText = sci.adresseFixe;
+      } else {
+        document.getElementById('building-selection-block').classList.remove('hidden');
+        document.getElementById('building-fixed-block').classList.add('hidden');
+        var radios = document.getElementsByName('building_address');
+        for(var i=0; i<radios.length; i++) radios[i].checked = false;
+      }
+      resetTypeButtons(); 
+      checkCanProceedBuilding();
+    }
+
+    function openTenantList(sciKey) {
+      selectedSciKey = sciKey;
+      document.getElementById('step-home').classList.add('hidden');
+      document.getElementById('step-tenant-list').classList.remove('hidden');
+      document.getElementById('tenant-list-title').innerText = "Liste des locataires - " + SCI_DATA[sciKey].nom;
+
+      populateFilterDropdowns();
+      renderTenantTable();
+    }
+
+    function populateFilterDropdowns() {
+      var list = savedTenants[selectedSciKey] || [];
+      var keys = ['appartement', 'dateEntree', 'label', 'tel', 'email', 'dateSortie'];
+      
+      keys.forEach(key => {
+        var select = document.getElementById('filter-' + key);
+        if(!select) return;
+        var currentVal = select.value;
+        var uniqueVals = [];
+        list.forEach(item => {
+          var val = item[key] || '-';
+          if(uniqueVals.indexOf(val) === -1) uniqueVals.push(val);
+        });
+        uniqueVals.sort();
+        
+        select.innerHTML = '<option value="">-- Tous --</option>';
+        uniqueVals.forEach(val => {
+          var opt = document.createElement('option');
+          opt.value = val;
+          opt.textContent = val;
+          select.appendChild(opt);
+        });
+        select.value = currentVal;
+      });
+    }
+
+    function renderTenantTable() {
+      var tbody = document.getElementById('tenant-table-body');
+      tbody.innerHTML = '';
+      var list = savedTenants[selectedSciKey] || [];
+      if(list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="p-4 text-center text-slate-500 italic">Aucun locataire enregistré pour cette SCI.</td></tr>';
+        return;
+      }
+
+      var fApp = document.getElementById('filter-appartement').value;
+      var fDateEnt = document.getElementById('filter-dateEntree').value;
+      var fOcc = document.getElementById('filter-occupant').value;
+      var fTel = document.getElementById('filter-tel').value;
+      var fEmail = document.getElementById('filter-email').value;
+      var fDateSort = document.getElementById('filter-dateSortie').value;
+
+      var visibleCount = 0;
+      for(var i=0; i<list.length; i++) {
+        var t = list[i];
+        var app = t.appartement || selectedLogement || 'N/C';
+        var dtEnt = t.dateEntree || '-';
+        var occ = t.label || 'N/C';
+        var tel = t.tel || 'N/C';
+        var email = t.email || 'N/C';
+        var dtSort = t.dateSortie || '-';
+
+        if(fApp && app !== fApp) continue;
+        if(fDateEnt && dtEnt !== fDateEnt) continue;
+        if(fOcc && occ !== fOcc) continue;
+        if(fTel && tel !== fTel) continue;
+        if(fEmail && email !== fEmail) continue;
+        if(fDateSort && dtSort !== fDateSort) continue;
+
+        visibleCount++;
+        var tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition-all text-xs";
+        tr.innerHTML = 
+          '<td class="p-3 border-r border-slate-200 font-medium text-slate-900">' + app + '</td>' +
+          '<td class="p-3 border-r border-slate-200 text-slate-600">' + dtEnt + '</td>' +
+          '<td class="p-3 border-r border-slate-200 font-semibold text-slate-800">' + occ + '</td>' +
+          '<td class="p-3 border-r border-slate-200 text-slate-600">' + tel + '</td>' +
+          '<td class="p-3 border-r border-slate-200 text-blue-600 underline">' + email + '</td>' +
+          '<td class="p-3 border-r border-slate-200 text-slate-600">' + dtSort + '</td>' +
+          '<td class="p-3 border-r border-slate-200 text-slate-400 italic">Document non généré</td>' +
+          '<td class="p-3 text-slate-400 italic">Document non généré</td>';
+        tbody.appendChild(tr);
+      }
+
+      if(visibleCount === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="p-4 text-center text-slate-500 italic">Aucun résultat ne correspond aux filtres sélectionnés.</td></tr>';
+      }
+    }
+
+    function filterTenantTable() { renderTenantTable(); }
+    function resetTableFilters() {
+      ['filter-appartement', 'filter-dateEntree', 'filter-occupant', 'filter-tel', 'filter-email', 'filter-dateSortie'].forEach(id => {
+        var el = document.getElementById(id);
+        if(el) el.value = "";
+      });
+      renderTenantTable();
+    }
+
+    function exportTableToExcel() {
+      var table = document.getElementById('tenant-table');
+      var rows = table.querySelectorAll('tr');
+      var csv = [];
+      for(var i=0; i<rows.length; i++) {
+        if(rows[i].style.display === 'none') continue;
+        var row = [], cols = rows[i].querySelectorAll('th, td');
+        for(var j=0; j<cols.length; j++) {
+          var text = cols[j].innerText.replace(/[\n\r]+/g, ' ').trim();
+          row.push('"' + text.replace(/"/g, '""') + '"');
+        }
+        csv.push(row.join(';'));
+      }
+      var csvFile = new Blob(["\uFEFF" + csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      var downloadLink = document.createElement('a');
+      downloadLink.download = 'suivi_locataires_' + selectedSciKey + '.csv';
+      downloadLink.href = window.URL.createObjectURL(csvFile);
+      downloadLink.style.display = 'none';
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+    }
+
+    function goBackToHome() {
+      var ids = ['step-building', 'step-tenant-list', 'step-logement', 'step-tenant', 'step-inspection'];
+      for(var i=0; i<ids.length; i++) {
+        var el = document.getElementById(ids[i]);
+        if(el) el.classList.add('hidden');
+      }
+      document.getElementById('step-home').classList.remove('hidden');
+    }
+
+    function goBackToBuilding() { document.getElementById('step-logement').classList.add('hidden'); document.getElementById('step-building').classList.remove('hidden'); }
+    function goBackToLogement() { document.getElementById('step-tenant').classList.add('hidden'); document.getElementById('step-logement').classList.remove('hidden'); }
+    function goBackToTenant() { document.getElementById('step-inspection').classList.add('hidden'); document.getElementById('step-tenant').classList.remove('hidden'); }
+
+    function onAddressSelected() {
+      var radios = document.getElementsByName('building_address');
+      for(var i=0; i<radios.length; i++) { if(radios[i].checked) selectedAddress = radios[i].value; }
+      checkCanProceedBuilding();
+    }
+
+    function setEdlType(type) {
+      selectedEdlType = type; resetTypeButtons();
+      if(type === 'Entrée') document.getElementById('btn-type-entrée').classList.add('border-emerald-600', 'bg-emerald-50');
+      else document.getElementById('btn-type-sortie').classList.add('border-amber-600', 'bg-amber-50');
+      checkCanProceedBuilding();
+    }
+
+    function resetTypeButtons() {
+      document.getElementById('btn-type-entrée').classList.remove('border-emerald-600', 'bg-emerald-50');
+      document.getElementById('btn-type-sortie').classList.remove('border-amber-600', 'bg-amber-50');
+    }
+
+    function checkCanProceedBuilding() {
+      var btn = document.getElementById('btn-next-step');
+      if(btn) btn.disabled = !(selectedSciKey && selectedAddress && selectedEdlType);
+    }
+
+    function proceedToLogement() {
+      document.getElementById('step-building').classList.add('hidden');
+      document.getElementById('step-logement').classList.remove('hidden');
+      var select = document.getElementById('logement-select');
+      select.innerHTML = '<option value="">-- Sélectionnez un logement --</option>';
+      var list = LOGEMENTS_DATA[selectedAddress] || [];
+      for(var i=0; i<list.length; i++) {
+        var opt = document.createElement('option'); opt.value = list[i]; opt.textContent = list[i];
+        select.appendChild(opt);
+      }
+    }
+
+    function proceedToTenant() {
+      var select = document.getElementById('logement-select');
+      if(!select.value) { alert("Veuillez sélectionner un logement."); return; }
+      selectedLogement = select.value;
+      document.getElementById('step-logement').classList.add('hidden');
+      document.getElementById('step-tenant').classList.remove('hidden');
+      document.getElementById('block-existing-tenant').classList.add('hidden');
+      document.getElementById('block-new-tenant').classList.add('hidden');
+      tenantMode = null;
+    }
+
+    function setTenantMode(mode) {
+      tenantMode = mode;
+      var cardEx = document.getElementById('card-mode-existing');
+      var cardNew = document.getElementById('card-mode-new');
+      var blockEx = document.getElementById('block-existing-tenant');
+      var blockNew = document.getElementById('block-new-tenant');
+
+      if(mode === 'existing') {
+        cardEx.classList.add('border-blue-600', 'bg-blue-50/30'); cardNew.classList.remove('border-blue-600', 'bg-blue-50/30');
+        blockEx.classList.remove('hidden'); blockNew.classList.add('hidden');
+        populateExistingTenantsCheckboxes();
+      } else {
+        cardNew.classList.add('border-blue-600', 'bg-blue-50/30'); cardEx.classList.remove('border-blue-600', 'bg-blue-50/30');
+        blockNew.classList.remove('hidden'); blockEx.classList.add('hidden');
+      }
+    }
+
+    function onCivilityChange() {
+      var civ = document.getElementById('tenant-civility').value;
+      var fPm = document.getElementById('fields-pm');
+      var blockLoc1 = document.getElementById('t-nom-1').closest('.bg-slate-50');
+      var blockColoc2 = document.getElementById('block-coloc-2');
+      var labelLoc1 = document.getElementById('label-loc-1');
+
+      if(civ === 'Personne morale') {
+        blockLoc1.classList.add('hidden'); blockColoc2.classList.add('hidden'); fPm.classList.remove('hidden');
+      } else {
+        fPm.classList.add('hidden'); blockLoc1.classList.remove('hidden');
+        if(civ === 'Mr et Mme' || civ === 'Mr et Mr' || civ === 'Mme et Mme') {
+          blockColoc2.classList.remove('hidden'); labelLoc1.innerText = "Coordonnées du premier locataire";
+        } else {
+          blockColoc2.classList.add('hidden'); labelLoc1.innerText = "Coordonnées du locataire";
+        }
+      }
+    }
+
+    function populateExistingTenantsCheckboxes() {
+      var container = document.getElementById('existing-tenants-checkboxes');
+      container.innerHTML = '';
+      var list = savedTenants[selectedSciKey] || [];
+      if(list.length === 0) {
+        container.innerHTML = '<p class="text-xs text-slate-500 italic">Aucun locataire enregistré.</p>';
+        return;
+      }
+      for(var i=0; i<list.length; i++) {
+        var t = list[i];
+        var occupantName = t.label || 'N/C';
+        var div = document.createElement('label');
+        div.className = "flex items-center space-x-2 text-xs p-1 hover:bg-slate-100 rounded cursor-pointer";
+        div.innerHTML = '<input type="checkbox" name="selected_tenant_chk" value="' + i + '" class="rounded text-blue-600 focus:ring-blue-500"> ' +
+                        '<span class="font-medium text-slate-800">' + occupantName + '</span> <span class="text-slate-400 text-[11px]">(' + (t.appartement || 'Lot non spécifié') + ')</span>';
+        container.appendChild(div);
+      }
+    }
+
+    function validateEmail(email) { return email.indexOf('@') > -1 && email.indexOf('.') > -1; }
+    function validatePhone(phone) {
+      if(!phone) return true;
+      var clean = phone.replace(/\s+/g, '');
+      return /^\d{10}$/.test(clean) || /^\+\d{1,3}\d{9}$/.test(clean);
+    }
+
+    function saveNewTenant() {
+      var civ = document.getElementById('tenant-civility').value;
+      var tenantData = {};
+      var todayDate = new Date().toLocaleDateString('fr-FR');
+
+      if(civ === 'Personne morale') {
+        var societe = formatName(document.getElementById('pm-societe').value);
+        var nom = formatName(document.getElementById('pm-nom').value);
+        var prenom = formatFirstName(document.getElementById('pm-prenom').value);
+        var tel = document.getElementById('pm-tel').value.trim();
+        var email = document.getElementById('pm-email').value.trim();
+        var siege = document.getElementById('pm-siege').value.trim();
+
+        if(!societe || !nom || !prenom) { alert("Champs obligatoires manquants."); return null; }
+        if(email && !validateEmail(email)) { alert("Erreur : Format e-mail invalide."); return null; }
+        if(tel && !validatePhone(tel)) { alert("Erreur : Numéro de téléphone invalide."); return null; }
+
+        tenantData = { appartement: selectedLogement, dateEntree: (selectedEdlType === 'Entrée' ? todayDate : ''), label: societe + " (Représenté par " + nom + " " + prenom + ")", tel: tel, email: email, siege: siege, dateSortie: '' };
+      } else {
+        var nom1 = formatName(document.getElementById('t-nom-1').value);
+        var prenom1 = formatFirstName(document.getElementById('t-prenom-1').value);
+        var tel1 = document.getElementById('t-tel-1').value.trim();
+        var email1 = document.getElementById('t-email-1').value.trim();
+        var adresse1 = document.getElementById('t-adresse-1').value.trim();
+
+        if(!nom1 || !prenom1) { alert("Les nom et prénom sont obligatoires."); return null; }
+        if(email1 && !validateEmail(email1)) { alert("Erreur : Format e-mail invalide du premier locataire."); return null; }
+        if(tel1 && !validatePhone(tel1)) { alert("Erreur : Téléphone invalide du premier locataire."); return null; }
+
+        if(civ === 'Mr et Mme' || civ === 'Mr et Mr' || civ === 'Mme et Mme') {
+          var nom2 = formatName(document.getElementById('t-nom-2').value);
+          var prenom2 = formatFirstName(document.getElementById('t-prenom-2').value);
+          var tel2 = document.getElementById('t-tel-2').value.trim();
+          var email2 = document.getElementById('t-email-2').value.trim();
+          var adresse2 = document.getElementById('t-adresse-2').value.trim();
+
+          if(!nom2 || !prenom2) { alert("Les nom et prénom du second colocataire sont obligatoires."); return null; }
+          if(email2 && !validateEmail(email2)) { alert("Erreur : Format e-mail invalide du second colocataire."); return null; }
+          if(tel2 && !validatePhone(tel2)) { alert("Erreur : Téléphone invalide du second colocataire."); return null; }
+
+          tenantData = { appartement: selectedLogement, dateEntree: (selectedEdlType === 'Entrée' ? todayDate : ''), label: civ + " " + nom1 + " " + prenom1 + " & " + nom2 + " " + prenom2, tel: tel1 + (tel2 ? ' / ' + tel2 : ''), email: email1 + (email2 ? ' / ' + email2 : ''), adresse: adresse1, dateSortie: '' };
+        } else {
+          tenantData = { appartement: selectedLogement, dateEntree: (selectedEdlType === 'Entrée' ? todayDate : ''), label: civ + " " + nom1 + " " + prenom1, tel: tel1, email: email1, adresse: adresse1, dateSortie: '' };
+        }
+      }
+
+      savedTenants[selectedSciKey].push(tenantData);
+
+      var feedback = document.getElementById('save-feedback');
+      if(feedback) feedback.classList.remove('hidden');
+
+      document.getElementById('t-nom-1').value = '';
+      document.getElementById('t-prenom-1').value = '';
+      document.getElementById('t-tel-1').value = '';
+      document.getElementById('t-email-1').value = '';
+      document.getElementById('t-adresse-1').value = '';
+
+      return tenantData;
+    }
+
+    function promptInspectionSource() {
+      currentTenantDataList = [];
+      if(tenantMode === 'existing') {
+        var checkboxes = document.querySelectorAll('input[name="selected_tenant_chk"]:checked');
+        if(checkboxes.length === 0) { alert("Veuillez cocher au moins un locataire dans la liste."); return; }
+        for(var i=0; i<checkboxes.length; i++) {
+          var idx = checkboxes[i].value;
+          currentTenantDataList.push(savedTenants[selectedSciKey][idx]);
+        }
+      } else if(tenantMode === 'new') {
+        var nomVal = document.getElementById('t-nom-1').value.trim();
+        var prenomVal = document.getElementById('t-prenom-1').value.trim();
+        if(nomVal && prenomVal) {
+          var newT = saveNewTenant();
+          if(newT) currentTenantDataList.push(newT);
+        }
+        var allList = savedTenants[selectedSciKey];
+        if(currentTenantDataList.length === 0 && allList.length > 0) {
+          currentTenantDataList.push(allList[allList.length - 1]);
+        }
+        if(currentTenantDataList.length === 0) {
+          alert("Veuillez d'abord enregistrer un locataire.");
+          return;
+        }
+      } else {
+        alert("Veuillez choisir un mode de sélection ou de création de locataire.");
+        return;
+      }
+
+      document.getElementById('modal-trame').classList.remove('hidden');
+    }
+
+    function initInspection(source) {
+      document.getElementById('modal-trame').classList.add('hidden');
+      document.getElementById('step-tenant').classList.add('hidden');
+      document.getElementById('step-inspection').classList.remove('hidden');
+
+      document.getElementById('insp-type-label').innerText = selectedEdlType.toUpperCase();
+      document.getElementById('cart-adresse').innerText = selectedLogement + ", " + selectedAddress;
+      document.getElementById('cart-sci').innerText = SCI_DATA[selectedSciKey].nom;
+      document.getElementById('cart-siege').innerText = "Siège social : " + SCI_DATA[selectedSciKey].siege;
+      
+      var occupantsNames = currentTenantDataList.map(t => t.label).join(" & ");
+      document.getElementById('cart-locataire').innerText = occupantsNames;
+      
+      document.getElementById('cart-date').valueAsDate = new Date();
+
+      if(selectedEdlType === 'Sortie') document.getElementById('cart-nouvelle-adresse-box').classList.remove('hidden');
+
+      var isSciAh = (selectedSciKey === 'SCI_2');
+      if(isSciAh) {
+        var el1 = document.getElementById('sci-ah-keys-1');
+        var el2 = document.getElementById('sci-ah-keys-2');
+        if(el1) el1.classList.remove('hidden');
+        if(el2) el2.classList.remove('hidden');
+      }
+
+      var heatingContainer = document.getElementById('chauffage-container');
+      heatingContainer.innerHTML = '';
+      var isStudioAh = isSciAh && (selectedLogement.indexOf('Studio') > -1);
+
+      if(isStudioAh) {
+        heatingContainer.innerHTML = '<p><strong>Chauffage électrique :</strong></p>' +
+          '<div class="grid grid-cols-2 gap-3">' +
+            '<div><label class="block">1 radiateur pièce principale :</label><select class="w-full border rounded p-1.5 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div>' +
+            '<div><label class="block">1 radiateur salle d\'eau :</label><select class="w-full border rounded p-1.5 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div>' +
+          '</div>' +
+          '<p class="text-slate-500 italic mt-2">Production d\'eau chaude par ballon d\'eau chaude en cave.</p>';
+      } else {
+        var loc = "dans la cuisine";
+        if(selectedLogement.indexOf('fond de cour') > -1 || selectedLogement.indexOf('accès par le 19') > -1) loc = "dans la salle d'eau";
+        if(selectedLogement === 'Pavillon 1 rue JBC') loc = "dans la cave";
+
+        var html = '<p><strong>Chaudière individuelle au gaz (' + loc + ') :</strong></p>' +
+          '<select class="w-full border rounded p-1.5 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select>' +
+          '<p class="text-slate-500 italic">Production d\'eau chaude assurée par la chaudière.</p>';
+
+        if(isSciAh) {
+          html += '<div class="border p-3 rounded-lg mt-3 bg-slate-50 space-y-2">' +
+            '<p class="font-bold text-slate-800">Thermostat :</p>' +
+            '<div class="grid md:grid-cols-2 gap-2">' +
+              '<div><label class="block font-medium">État Thermostat :</label><select class="w-full border rounded p-1.5 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div>' +
+              '<div><label class="block font-medium">Emplacement :</label><input type="text" placeholder="Emplacement" class="w-full border rounded p-1.5 bg-white"></div>' +
+            '</div>' +
+            '<div class="flex gap-2 pt-1"><input type="file" accept="image/*" multiple class="w-full text-xs"><button type="button" onclick="alert(\'Ouverture caméra...\')" class="bg-slate-800 text-white px-2 py-1 rounded text-xs whitespace-nowrap">📷 Photo</button></div>' +
+          '</div>';
+        }
+        heatingContainer.innerHTML = html;
+      }
+
+      if(selectedSciKey === 'SCI_1') {
+        buildSciClementRosiersRooms();
+      } else if(selectedSciKey === 'SCI_2') {
+        buildSciAhRooms();
+      }
+      initSignaturesCanvas();
+    }
+
+    function togglePorteFields(selectEl) {
+      var card = selectEl.closest('.border');
+      var isOui = (selectEl.value === 'Oui');
+      var selects = card.querySelectorAll('select.porte-sub');
+      selects.forEach(s => {
+        s.disabled = !isOui;
+        if(!isOui) s.selectedIndex = 0;
+      });
+    }
+
+    function toggleFenetreFields(selectEl) {
+      var card = selectEl.closest('.border');
+      var typeVal = card.querySelector('.fenetre-type').value;
+      var numVal = card.querySelector('.fenetre-num').value;
+      var isDisabled = (typeVal === 'Sans' || numVal === '0');
+      var subFields = card.querySelectorAll('.fenetre-sub');
+      subFields.forEach(s => {
+        s.disabled = isDisabled;
+        if(isDisabled) s.selectedIndex = 0;
+      });
+    }
+
+    function toggleRadiateurFields(selectEl) {
+      var card = selectEl.closest('.border');
+      var isDisabled = (selectEl.value === '0');
+      var subFields = card.querySelectorAll('.rad-sub');
+      subFields.forEach(s => {
+        s.disabled = isDisabled;
+        if(isDisabled) s.selectedIndex = 0;
+      });
+    }
+
+    var itemPorteStandard = '<div class="border p-3 rounded-lg bg-slate-50/50 space-y-2">' +
+      '<span class="font-bold block text-slate-800">Porte</span>' +
+      '<div class="grid grid-cols-2 md:grid-cols-4 gap-2">' +
+        '<div><label class="block font-medium">Porte :</label><select onchange="togglePorteFields(this)" class="w-full border rounded p-1 bg-white"><option value="Oui">Oui</option><option value="Non">Non</option></select></div>' +
+        '<div><label class="block font-medium">Type :</label><select class="porte-sub w-full border rounded p-1 bg-white"><option>Bois peint</option><option>Bois et vitrage</option><option>PVC</option><option>Blindée</option></select></div>' +
+        '<div><label class="block font-medium">État :</label><select class="porte-sub w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div>' +
+        '<div><label class="block font-medium">Serrure + clé :</label><select class="porte-sub w-full border rounded p-1 bg-white"><option>Oui</option><option>Non</option></select></div>' +
+      '</div>' +
+      '<input type="text" placeholder="Notes sur la porte (1 ligne)..." class="w-full border rounded p-1.5 bg-white mt-1">' +
+    '</div>';
+
+    var itemFenetreStandard = '<div class="border p-3 rounded-lg bg-slate-50/50 space-y-2">' +
+      '<span class="font-bold block text-slate-800">Fenêtre(s)</span>' +
+      '<div class="grid grid-cols-2 md:grid-cols-5 gap-2">' +
+        '<div><label class="block font-medium">Type :</label><select onchange="toggleFenetreFields(this)" class="fenetre-type w-full border rounded p-1 bg-white"><option>PVC</option><option>Bois</option><option>Velux</option><option value="Sans">Sans</option></select></div>' +
+        '<div><label class="block font-medium">Nombre :</label><select onchange="toggleFenetreFields(this)" class="fenetre-num w-full border rounded p-1 bg-white"><option value="1">1</option><option value="0">0</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></div>' +
+        '<div><label class="block font-medium">État Fenêtre :</label><select class="fenetre-sub w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div>' +
+        '<div><label class="block font-medium">Volet :</label><select class="fenetre-sub w-full border rounded p-1 bg-white"><option>Volet PVC</option><option>Volet métallique</option><option>Sans volet</option></select></div>' +
+        '<div><label class="block font-medium">État Volet :</label><select class="fenetre-sub w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div>' +
+      '</div>' +
+      '<input type="text" placeholder="Notes sur les fenêtres (1 ligne)..." class="w-full border rounded p-1.5 bg-white mt-1">' +
+    '</div>';
+
+    function buildBaseRoomHTML(num, name, extraFields) {
+      extraFields = extraFields || '';
+      return '<div class="border rounded-xl p-4 space-y-4 text-xs bg-white">' +
+        '<h3 class="font-bold text-slate-900 text-base border-b pb-2">' + num + '. ' + name + '</h3>' +
+        '<div><label class="block font-medium mb-1">Propreté générale</label><select class="w-full border rounded p-1.5 bg-white"><option>Propre</option><option>Moyen</option><option>Sale</option></select></div>' +
+        itemPorteStandard +
+        itemFenetreStandard +
+        extraFields +
+        '<!-- Murs -->' +
+        '<div class="border p-3 rounded-lg bg-slate-50/50 space-y-2"><span class="font-bold block text-slate-800">Murs</span><div class="grid grid-cols-2 gap-2"><select class="border rounded p-1 bg-white"><option>Peinture</option><option>Papier peint</option><option>Toile de verre</option></select><select class="border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div><textarea rows="3" placeholder="Notes sur les murs (3 lignes)..." class="w-full border rounded p-1.5 bg-white"></textarea><div class="flex gap-2"><input type="file" accept="image/*" multiple class="w-full"><button type="button" onclick="alert(\'Ouverture caméra...\')" class="bg-slate-800 text-white px-2 py-1 rounded whitespace-nowrap">📷 Photo</button></div></div>' +
+        '<!-- Sol -->' +
+        '<div class="border p-3 rounded-lg bg-slate-50/50 space-y-2"><span class="font-bold block text-slate-800">Sol</span><div class="grid grid-cols-2 gap-2"><select class="border rounded p-1 bg-white"><option>Parquet massif</option><option>Carrelage</option><option>Sol PVC</option><option>Moquette</option></select><select class="border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div><textarea rows="3" placeholder="Notes sur le sol (3 lignes)..." class="w-full border rounded p-1.5 bg-white"></textarea><div class="flex gap-2"><input type="file" accept="image/*" multiple class="w-full"><button type="button" onclick="alert(\'Ouverture caméra...\')" class="bg-slate-800 text-white px-2 py-1 rounded whitespace-nowrap">📷 Photo</button></div></div>' +
+        '<!-- Plafond -->' +
+        '<div class="border p-3 rounded-lg bg-slate-50/50 space-y-2"><span class="font-bold block text-slate-800">Plafond</span><div class="grid grid-cols-2 gap-2"><select class="border rounded p-1 bg-white"><option>Peinture</option><option>Papier peint</option><option>Toile de verre</option></select><select class="border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div><input type="text" placeholder="Notes sur le plafond (1 ligne)..." class="w-full border rounded p-1.5 bg-white"><div class="flex gap-2"><input type="file" accept="image/*" multiple class="w-full"><button type="button" onclick="alert(\'Ouverture caméra...\')" class="bg-slate-800 text-white px-2 py-1 rounded whitespace-nowrap">📷 Photo</button></div></div>' +
+        '<!-- Plinthes -->' +
+        '<div class="border p-3 rounded-lg bg-slate-50/50 space-y-2"><span class="font-bold block text-slate-800">Plinthes</span><div class="grid grid-cols-2 gap-2"><select class="border rounded p-1 bg-white"><option>Bois</option><option>Carrelage</option><option>Sans</option></select><select class="border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div><input type="text" placeholder="Notes sur les plinthes (1 ligne)..." class="w-full border rounded p-1.5 bg-white"></div>' +
+        '<!-- Radiateur -->' +
+        '<div class="border p-3 rounded-lg bg-slate-50/50 space-y-2"><span class="font-bold block text-slate-800">Radiateur</span><div class="grid grid-cols-3 gap-2"><div><label class="block">Nombre :</label><select onchange="toggleRadiateurFields(this)" class="w-full border rounded p-1 bg-white"><option value="1">1</option><option value="0">0</option><option value="2">2</option><option value="3">3</option></select></div><div><label class="block">Type :</label><select class="rad-sub w-full border rounded p-1 bg-white"><option>Radiateur à eau</option><option>Convecteur électrique</option></select></div><div><label class="block">État :</label><select class="rad-sub w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div></div></div>' +
+        '<!-- Électricité -->' +
+        '<div class="border p-3 rounded-lg bg-slate-50/50 space-y-2"><span class="font-bold block text-slate-800">Électricité</span><div class="grid grid-cols-3 gap-2"><div><label class="block">Plafonnier :</label><select class="w-full border rounded p-1 bg-white"><option>Oui</option><option>Non</option></select></div><div><label class="block">Interrupteurs :</label><select class="w-full border rounded p-1 bg-white"><option>0</option><option>1</option><option>2</option><option>3</option></select></div><div><label class="block">Prises :</label><select class="w-full border rounded p-1 bg-white"><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></div></div><select class="w-full border rounded p-1 bg-white mt-1"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select><input type="text" placeholder="Notes sur l\'électricité (1 ligne)..." class="w-full border rounded p-1.5 bg-white mt-2"><div class="flex gap-2"><input type="file" accept="image/*" multiple class="w-full"><button type="button" onclick="alert(\'Ouverture caméra...\')" class="bg-slate-800 text-white px-2 py-1 rounded whitespace-nowrap">📷 Photo</button></div></div>' +
+      '</div>';
+    }
+
+    var extraSdbSansWc = '<div class="space-y-2 border p-3 rounded bg-slate-50"><span class="font-bold block text-slate-800">Douche / Baignoire & Équipements SDB</span><div class="grid grid-cols-2 md:grid-cols-3 gap-2"><div><label class="block">Équipement :</label><select class="w-full border rounded p-1 bg-white"><option>Douche</option><option>Baignoire</option></select></div><div><label class="block">État Douche/Bain :</label><select class="w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div><div><label class="block">Robinetterie douche/bain :</label><select class="w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option><option>Entartré</option></select></div><div><label class="block">Faïence douche/bain :</label><select class="w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div><div><label class="block">Lavabo :</label><select class="w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div><div><label class="block">Robinetterie lavabo :</label><select class="w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option><option>Entartré</option></select></div><div><label class="block">Faïence lavabo :</label><select class="w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div></div><input type="text" placeholder="Notes sur la salle de bains (1 ligne)..." class="w-full border rounded p-1.5 bg-white mt-1"><div class="flex gap-2 pt-1"><input type="file" accept="image/*" multiple class="w-full"><button type="button" onclick="alert(\'Ouverture caméra...\')" class="bg-slate-800 text-white px-2 py-1 rounded whitespace-nowrap">📷 Photo</button></div></div>';
+    
+    var extraSdbAvecWc = '<div class="space-y-2 border p-3 rounded bg-slate-50"><span class="font-bold block text-slate-800">Douche / Baignoire & Équipements SDB avec WC</span><div class="grid grid-cols-2 md:grid-cols-3 gap-2"><div><label class="block">Équipement :</label><select class="w-full border rounded p-1 bg-white"><option>Douche</option><option>Baignoire</option></select></div><div><label class="block">État Douche/Bain :</label><select class="w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div><div><label class="block">Robinetterie douche/bain :</label><select class="w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option><option>Entartré</option></select></div><div><label class="block">Faïence douche/bain :</label><select class="w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div><div><label class="block">Lavabo :</label><select class="w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div><div><label class="block">Robinetterie lavabo :</label><select class="w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option><option>Entartré</option></select></div><div><label class="block">Faïence lavabo :</label><select class="w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div><div><label class="block">WC :</label><select class="w-full border rounded p-1 bg-white"><option>Oui - Neuf</option><option>Oui - Bon état</option><option>Oui - Moyen</option><option>Oui - Mauvais</option><option>Non</option></select></div></div><input type="text" placeholder="Notes sur la salle de bains (1 ligne)..." class="w-full border rounded p-1.5 bg-white mt-1"><div class="flex gap-2 pt-1"><input type="file" accept="image/*" multiple class="w-full"><button type="button" onclick="alert(\'Ouverture caméra...\')" class="bg-slate-800 text-white px-2 py-1 rounded whitespace-nowrap">📷 Photo</button></div></div>';
+
+    var extraWcIndependant = '<div class="border p-3 rounded bg-slate-50 space-y-2"><span class="font-bold block text-slate-800">Équipement WC</span><div><label class="block font-medium">WC :</label><select class="w-full border rounded p-1 bg-white"><option>Oui - Neuf</option><option>Oui - Bon état</option><option>Oui - Moyen</option><option>Oui - Mauvais</option></select></div><input type="text" placeholder="Notes sur le WC (1 ligne)..." class="w-full border rounded p-1.5 bg-white mt-1"><div class="flex gap-2 pt-1"><input type="file" accept="image/*" multiple class="w-full"><button type="button" onclick="alert(\'Ouverture caméra...\')" class="bg-slate-800 text-white px-2 py-1 rounded whitespace-nowrap">📷 Photo</button></div></div>';
+    
+    var extraCuisine = '<div class="space-y-2 border p-3 rounded bg-slate-50"><span class="font-bold block text-slate-800">Évier & Équipements Cuisine</span><div class="grid grid-cols-2 md:grid-cols-4 gap-2"><div><label class="block">Type Évier :</label><select class="w-full border rounded p-1 bg-white"><option>Grès</option><option>Inox</option><option>PVC</option></select></div><div><label class="block">État Évier :</label><select class="w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div><div><label class="block">Robinetterie :</label><select class="w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option><option>Entartré</option></select></div><div><label class="block">Faïence :</label><select class="w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div><div><label class="block">Meuble sous évier :</label><select class="w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div></div><input type="text" placeholder="Notes sur l\'évier (1 ligne)..." class="w-full border rounded p-1.5 bg-white mt-1"><div class="flex gap-2 pt-1"><input type="file" accept="image/*" multiple class="w-full"><button type="button" onclick="alert(\'Ouverture caméra...\')" class="bg-slate-800 text-white px-2 py-1 rounded whitespace-nowrap">📷 Photo</button></div></div>';
+
+    var extraEscalier = '<div class="border p-3 rounded bg-slate-50 space-y-2"><span class="font-bold block text-slate-800">Escalier</span><div class="grid grid-cols-2 gap-2"><div><label class="block font-medium">Revêtement :</label><select class="w-full border rounded p-1 bg-white"><option>Bois vernis</option><option>Bois vitrifié</option><option>PVC</option></select></div><div><label class="block font-medium">État :</label><select class="w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div></div><input type="text" placeholder="Notes sur l\'escalier..." class="w-full border rounded p-1.5 bg-white"><div class="flex gap-2"><input type="file" accept="image/*" multiple class="w-full"><button type="button" onclick="alert(\'Ouverture caméra...\')" class="bg-slate-800 text-white px-2 py-1 rounded whitespace-nowrap">📷 Photo</button></div></div>';
+
+    function buildTerrasseRoomHTML(num, name) {
+      return '<div class="border rounded-xl p-4 space-y-4 text-xs bg-white">' +
+        '<h3 class="font-bold text-slate-900 text-base border-b pb-2">' + num + '. ' + name + '</h3>' +
+        '<div><label class="block font-medium mb-1">Propreté générale</label><select class="w-full border rounded p-1.5 bg-white"><option>Propre</option><option>Moyen</option><option>Sale</option></select></div>' +
+        '<div class="space-y-3 border p-3 rounded bg-slate-50">' +
+          '<span class="font-bold block text-slate-800">Équipements Terrasse</span>' +
+          '<div class="grid grid-cols-3 gap-2">' +
+            '<div><label class="block font-medium">Sol PVC :</label><select class="w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div>' +
+            '<div><label class="block font-medium">Pare-vue PVC :</label><select class="w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div>' +
+            '<div><label class="block font-medium">Éclairage :</label><select class="w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div>' +
+          '</div>' +
+          '<textarea rows="2" placeholder="Notes sur la terrasse..." class="w-full border rounded p-1.5 bg-white"></textarea>' +
+          '<div class="flex gap-2"><input type="file" accept="image/*" multiple class="w-full"><button type="button" onclick="alert(\'Ouverture caméra...\')" class="bg-slate-800 text-white px-2 py-1 rounded whitespace-nowrap">📷 Photos</button></div>' +
+        '</div>' +
+      '</div>';
+    }
+
+    var itemPlacard = function(title) {
+      return '<div class="border p-2 rounded bg-slate-50 flex items-center justify-between"><span><strong>' + title + ' :</strong></span><select class="border rounded p-1 bg-white text-xs"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div>';
+    };
+
+    function buildSciClementRosiersRooms() {
+      var container = document.getElementById('pieces-container');
+      container.innerHTML = '';
+      var log = selectedLogement;
+
+      if(log === 'Pavillon 1 rue JBC') {
+        buildPavillonRooms();
+        return;
+      }
+
+      if(log === 'Boutique Rdc') {
+        container.innerHTML += buildBaseRoomHTML(6, "Boutique principale");
+        return;
+      }
+
+      var isF3_5e = (log.indexOf('5ème') > -1);
+      var isF3 = (log.indexOf('F3') > -1);
+      var isF2 = (log.indexOf('F2') > -1);
+
+      if(isF3_5e) {
+        container.innerHTML += buildBaseRoomHTML(6, "Entrée");
+        container.innerHTML += buildBaseRoomHTML(7, "Cuisine", extraCuisine);
+        container.innerHTML += buildBaseRoomHTML(8, "Salon / Salle à manger");
+        container.innerHTML += buildBaseRoomHTML(9, "Chambre sur cour");
+        container.innerHTML += buildBaseRoomHTML(10, "Salle de bains RDC", extraSdbSansWc);
+        container.innerHTML += buildBaseRoomHTML(11, "WC", extraWcIndependant);
+        container.innerHTML += buildBaseRoomHTML(12, "Escalier", extraEscalier);
+        container.innerHTML += buildBaseRoomHTML(13, "Chambre 1er étage");
+        container.innerHTML += buildBaseRoomHTML(14, "Salle de bains 1er étage", extraSdbSansWc);
+      } else if(isF3) {
+        container.innerHTML += buildBaseRoomHTML(6, "Entrée");
+        container.innerHTML += buildBaseRoomHTML(7, "Cuisine", extraCuisine);
+        container.innerHTML += buildBaseRoomHTML(8, "Salon");
+        container.innerHTML += buildBaseRoomHTML(9, "Chambre 1 sur cour");
+        container.innerHTML += buildBaseRoomHTML(10, "Chambre 2 sur rue");
+        container.innerHTML += buildBaseRoomHTML(11, "Salle de bains", extraSdbSansWc);
+        container.innerHTML += buildBaseRoomHTML(12, "WC", extraWcIndependant);
+      } else if(isF2) {
+        container.innerHTML += buildBaseRoomHTML(6, "Entrée", itemPlacard("Placard"));
+        container.innerHTML += buildBaseRoomHTML(7, "Cuisine", extraCuisine);
+        container.innerHTML += buildBaseRoomHTML(8, "Salon");
+        container.innerHTML += buildBaseRoomHTML(9, "Chambre");
+        container.innerHTML += buildBaseRoomHTML(10, "Salle de bains", extraSdbSansWc);
+        container.innerHTML += buildBaseRoomHTML(11, "WC", extraWcIndependant);
+      }
+    }
+
+    function buildPavillonRooms() {
+      var container = document.getElementById('pieces-container');
+      container.innerHTML = '';
+      container.innerHTML += buildBaseRoomHTML(6, "Entrée");
+      container.innerHTML += buildBaseRoomHTML(7, "Chambre 1 RDC sur cour");
+      container.innerHTML += buildBaseRoomHTML(8, "Chambre 2 RDC sur cour / rue JBC");
+      container.innerHTML += buildBaseRoomHTML(9, "Chambre 3 RDC angle rue des Rosiers / rue JBC");
+      container.innerHTML += buildBaseRoomHTML(10, "Chambre 4 RDC sur rue des Rosiers");
+      container.innerHTML += buildBaseRoomHTML(11, "Salle de bains RDC", extraSdbAvecWc);
+      container.innerHTML += buildBaseRoomHTML(12, "Escalier RDC - 1er étage", extraEscalier);
+      container.innerHTML += buildBaseRoomHTML(13, "Palier 1er étage");
+      container.innerHTML += buildBaseRoomHTML(14, "Bureau 1er étage angle rue des Rosiers / rue JBC");
+      container.innerHTML += buildBaseRoomHTML(15, "Salon 1er étage sur rue des Rosiers");
+      container.innerHTML += buildBaseRoomHTML(16, "Salle de bains 1er étage", extraSdbAvecWc);
+      container.innerHTML += buildBaseRoomHTML(17, "Cuisine 1er étage", extraCuisine);
+    }
+
+    function buildSciAhRooms() {
+      var container = document.getElementById('pieces-container');
+      container.innerHTML = '';
+      var log = selectedLogement;
+      var addr = selectedAddress;
+
+      var extraStudioMix = '<div class="space-y-2 border p-3 rounded bg-slate-50 mt-3"><span class="font-bold block text-slate-800">Évier & Équipements Cuisine Ouverte</span><div class="grid grid-cols-2 md:grid-cols-4 gap-2"><div><label class="block">Type Évier :</label><select class="w-full border rounded p-1 bg-white"><option>Grès</option><option>Inox</option><option>PVC</option></select></div><div><label class="block">État Évier :</label><select class="w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div><div><label class="block">Robinetterie :</label><select class="w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option><option>Entartré</option></select></div><div><label class="block">Faïence :</label><select class="w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div><div><label class="block">Meuble sous évier :</label><select class="w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div></div><input type="text" placeholder="Notes sur l\'évier (1 ligne)..." class="w-full border rounded p-1.5 bg-white mt-1"><div class="flex gap-2 pt-1"><input type="file" accept="image/*" multiple class="w-full"><button type="button" onclick="alert(\'Ouverture caméra...\')" class="bg-slate-800 text-white px-2 py-1 rounded whitespace-nowrap">📷 Photo</button></div></div>';
+
+      if(addr === '19 rue Alphonse Helbronner, 93400 Saint-Ouen-sur-Seine') {
+        if(log === 'Studio sur rue') {
+          container.innerHTML += buildBaseRoomHTML(6, "Pièce principale avec cuisine ouverte", extraStudioMix);
+          container.innerHTML += buildBaseRoomHTML(7, "Salle de bains WC", extraSdbAvecWc);
+        } else if(log === 'Studio sur cour') {
+          container.innerHTML += buildBaseRoomHTML(6, "Pièce principale avec cuisine ouverte", extraStudioMix);
+          container.innerHTML += buildBaseRoomHTML(7, "Salle de bains WC", extraSdbAvecWc);
+          container.innerHTML += buildTerrasseRoomHTML(8, "Terrasse");
+        } else if(log === 'F3 1er étage' || log === 'F3 2ème étage') {
+          container.innerHTML += buildBaseRoomHTML(6, "Entrée", itemPlacard("Placard"));
+          container.innerHTML += buildBaseRoomHTML(7, "Couloir");
+          container.innerHTML += buildBaseRoomHTML(8, "Séjour sur cuisine ouverte", extraStudioMix);
+          container.innerHTML += buildBaseRoomHTML(9, "Chambre 1", itemPlacard("Placard"));
+          container.innerHTML += buildBaseRoomHTML(10, "Chambre 2", itemPlacard("Placard"));
+          container.innerHTML += buildBaseRoomHTML(11, "Salle de bains", extraSdbSansWc);
+          container.innerHTML += buildBaseRoomHTML(12, "WC", extraWcIndependant);
+        } else if(log === 'F2 fond de cour') {
+          container.innerHTML += buildBaseRoomHTML(6, "Séjour avec cuisine ouverte", extraStudioMix);
+          container.innerHTML += buildBaseRoomHTML(7, "Cellier");
+          container.innerHTML += buildBaseRoomHTML(8, "WC", extraWcIndependant);
+          container.innerHTML += buildBaseRoomHTML(9, "Escalier", extraEscalier);
+          container.innerHTML += buildBaseRoomHTML(10, "Chambre");
+          container.innerHTML += buildBaseRoomHTML(11, "Salle de bains", extraSdbSansWc);
+          container.innerHTML += buildTerrasseRoomHTML(12, "Terrasse");
+        } else if(log === 'F2 cour accès par le 19') {
+          container.innerHTML += buildBaseRoomHTML(6, "Séjour avec cuisine ouverte", extraStudioMix);
+          container.innerHTML += buildBaseRoomHTML(7, "WC", extraWcIndependant);
+          container.innerHTML += buildBaseRoomHTML(8, "Escalier", extraEscalier);
+          container.innerHTML += buildBaseRoomHTML(9, "Chambre");
+          container.innerHTML += buildBaseRoomHTML(10, "Salle de bains", extraSdbSansWc);
+        }
+      }
+
+      if(addr === '21 rue Alphonse Helbronner, 93400 Saint-Ouen-sur-Seine') {
+        if(log === 'F3 rez-de-chaussée') {
+          container.innerHTML += buildBaseRoomHTML(6, "Salon sur cuisine ouverte", extraStudioMix + itemPlacard("Placard"));
+          container.innerHTML += buildBaseRoomHTML(7, "Couloir");
+          container.innerHTML += buildBaseRoomHTML(8, "Chambre 1 sur rue", itemPlacard("Placard 1") + itemPlacard("Placard 2"));
+          container.innerHTML += buildBaseRoomHTML(9, "Chambre 2 sur cour", itemPlacard("Placard"));
+          container.innerHTML += buildTerrasseRoomHTML(10, "Terrasse");
+          container.innerHTML += buildBaseRoomHTML(11, "WC", extraWcIndependant);
+          container.innerHTML += buildBaseRoomHTML(12, "Salle de bains", extraSdbSansWc);
+        } else if(log.indexOf('F3') > -1) {
+          container.innerHTML += buildBaseRoomHTML(6, "Salon sur cuisine ouverte", extraStudioMix + itemPlacard("Placard"));
+          container.innerHTML += buildBaseRoomHTML(7, "Couloir");
+          container.innerHTML += buildBaseRoomHTML(8, "Chambre 1 sur rue", itemPlacard("Placard 1") + itemPlacard("Placard 2"));
+          container.innerHTML += buildBaseRoomHTML(9, "Chambre 2 sur cour", itemPlacard("Placard"));
+          container.innerHTML += buildBaseRoomHTML(10, "WC", extraWcIndependant);
+          container.innerHTML += buildBaseRoomHTML(11, "Salle de bains", extraSdbSansWc);
+        } else if(log.indexOf('F2') > -1) {
+          container.innerHTML += buildBaseRoomHTML(6, "Séjour sur cuisine ouverte", extraStudioMix);
+          container.innerHTML += buildBaseRoomHTML(7, "Couloir");
+          container.innerHTML += buildBaseRoomHTML(8, "Chambre", itemPlacard("Placard"));
+          container.innerHTML += buildBaseRoomHTML(9, "Salle de bains", extraSdbAvecWc);
+        } else if(log === 'F3 3ème étage droite') {
+          container.innerHTML += buildBaseRoomHTML(6, "Salon sur cuisine ouverte", extraStudioMix);
+          container.innerHTML += buildBaseRoomHTML(7, "Couloir");
+          container.innerHTML += buildBaseRoomHTML(8, "Chambre rdc", itemPlacard("Placard"));
+          container.innerHTML += buildBaseRoomHTML(9, "Escalier", extraEscalier);
+          container.innerHTML += buildBaseRoomHTML(10, "Chambre étage", itemPlacard("Placard"));
+          container.innerHTML += buildBaseRoomHTML(11, "Salle de bains rdc", extraSdbAvecWc);
+          container.innerHTML += buildBaseRoomHTML(12, "Salle de bains étage", extraSdbSansWc);
+          container.innerHTML += buildBaseRoomHTML(13, "WC", extraWcIndependant);
+          container.innerHTML += buildTerrasseRoomHTML(14, "Terrasse");
+        } else if(log === 'F4 3ème étage gauche') {
+          container.innerHTML += buildBaseRoomHTML(6, "Salon sur cuisine ouverte", extraStudioMix + itemPlacard("Placard"));
+          container.innerHTML += buildBaseRoomHTML(7, "Couloir");
+          container.innerHTML += buildBaseRoomHTML(8, "Chambre rdc sur cour", itemPlacard("Placard"));
+          container.innerHTML += buildBaseRoomHTML(9, "Chambre rdc sur rue", itemPlacard("Placard"));
+          container.innerHTML += buildBaseRoomHTML(10, "Escalier", extraEscalier);
+          container.innerHTML += buildBaseRoomHTML(11, "Chambre étage", itemPlacard("Placard"));
+          container.innerHTML += buildBaseRoomHTML(12, "Salle de bains rdc", extraSdbAvecWc);
+          container.innerHTML += buildBaseRoomHTML(13, "Salle de bains étage", extraSdbSansWc);
+          container.innerHTML += buildBaseRoomHTML(14, "WC 1er étage", extraWcIndependant);
+          container.innerHTML += buildTerrasseRoomHTML(15, "Terrasse");
+        }
+      }
+    }
+
+    var canvasBailleurCtx, canvasLocataireCtx;
+    var isDrawingBailleur = false, isDrawingLocataire = false;
+
+    function initSignaturesCanvas() {
+      var cBailleur = document.getElementById('canvas-bailleur');
+      var cLocataire = document.getElementById('canvas-locataire');
+      if(!cBailleur || !cLocataire) return;
+      canvasBailleurCtx = cBailleur.getContext('2d');
+      canvasLocataireCtx = cLocataire.getContext('2d');
+
+      setupCanvasEvents(cBailleur, canvasBailleurCtx, 'bailleur');
+      setupCanvasEvents(cLocataire, canvasLocataireCtx, 'locataire');
+    }
+
+    function setupCanvasEvents(canvas, ctx, type) {
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#0f172a';
+
+      canvas.onmousedown = (e) => startDraw(e, canvas, ctx, type);
+      canvas.onmousemove = (e) => draw(e, canvas, ctx, type);
+      canvas.onmouseup = () => stopDraw(type);
+      canvas.onmouseleave = () => stopDraw(type);
+
+      canvas.ontouchstart = (e) => startDrawTouch(e, canvas, ctx, type);
+      canvas.ontouchmove = (e) => drawTouch(e, canvas, ctx, type);
+      canvas.ontouchend = () => stopDraw(type);
+    }
+
+    function getPos(e, canvas) {
+      var rect = canvas.getBoundingClientRect();
+      return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    }
+
+    function getTouchPos(e, canvas) {
+      var rect = canvas.getBoundingClientRect();
+      return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+    }
+
+    function startDraw(e, canvas, ctx, type) {
+      if(type === 'bailleur') isDrawingBailleur = true; else isDrawingLocataire = true;
+      var pos = getPos(e, canvas);
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
+    }
+
+    function draw(e, canvas, ctx, type) {
+      if((type === 'bailleur' && !isDrawingBailleur) || (type === 'locataire' && !isDrawingLocataire)) return;
+      var pos = getPos(e, canvas);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
+    }
+
+    function startDrawTouch(e, canvas, ctx, type) {
+      e.preventDefault();
+      if(type === 'bailleur') isDrawingBailleur = true; else isDrawingLocataire = true;
+      var pos = getTouchPos(e, canvas);
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
+    }
+
+    function drawTouch(e, canvas, ctx, type) {
+      e.preventDefault();
+      if((type === 'bailleur' && !isDrawingBailleur) || (type === 'locataire' && !isDrawingLocataire)) return;
+      var pos = getTouchPos(e, canvas);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
+    }
+
+    function stopDraw(type) {
+      if(type === 'bailleur') isDrawingBailleur = false; else isDrawingLocataire = false;
+    }
+
+    function clearSignature(canvasId) {
+      var canvas = document.getElementById(canvasId);
+      var ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function generateFormattedTitle() {
+      var sciPrefix = SCI_DATA[selectedSciKey].prefix || (selectedAddress.indexOf('19') > -1 ? 'AH19' : 'AH21');
+      var dateVal = document.getElementById('cart-date').value;
+      var dateFormatted = "16-Juil-26";
+      if(dateVal) {
+        var d = new Date(dateVal);
+        var months = ["Jan", "Fév", "Mars", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"];
+        dateFormatted = ("0" + d.getDate()).slice(-2) + "-" + months[d.getMonth()] + "-" + String(d.getFullYear()).slice(-2);
+      }
+      var typeEDL = selectedEdlType;
+      var appSlug = selectedLogement.replace(/[^a-zA-Z0-9]/g, '-');
+      
+      var cleanLocs = currentTenantDataList.map(t => {
+        var raw = t.label || "Locataire";
+        return raw.replace(/^(Monsieur|Mme|Mr|M\.)\s+/gi, '').replace(/[^a-zA-Z0-9]/g, '-');
+      }).join('_');
+
+      return sciPrefix + "_" + dateFormatted + "_" + typeEDL + "_" + appSlug + "_" + cleanLocs;
+    }
+
+    function validateAndSignInspection() {
+      var inputs = document.querySelectorAll('#step-inspection input, #step-inspection select, #step-inspection textarea');
+      inputs.forEach(el => el.disabled = true);
+
+      var finalDocTitle = generateFormattedTitle();
+      var titleBanner = document.getElementById('doc-title-banner');
+      if(titleBanner) {
+        titleBanner.innerText = "ÉTAT DES LIEUX OFFICIEL : " + finalDocTitle;
+        titleBanner.classList.remove('hidden');
+      }
+
+      var btnClear1 = document.getElementById('btn-clear-bailleur');
+      var btnClear2 = document.getElementById('btn-clear-locataire');
+      var btnVal = document.getElementById('btn-validate-seal');
+      var btnPrint = document.getElementById('btn-print-pdf');
+
+      if(btnClear1) btnClear1.classList.add('hidden');
+      if(btnClear2) btnClear2.classList.add('hidden');
+      if(btnVal) btnVal.classList.add('hidden');
+      if(btnPrint) btnPrint.classList.remove('hidden');
+
+      alert("✅ Constat validé, signé et scellé avec succès !\n\nNom du document : " + finalDocTitle + "\n\nLe document est verrouillé. Vous pouvez maintenant cliquer sur 'Imprimer / Enregistrer en PDF'.");
+    }
+  </script>
+</body>
+</html>
