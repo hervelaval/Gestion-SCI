@@ -11,6 +11,15 @@
       .print-only { display: block !important; }
       body { background: white; color: black; }
     }
+    .photo-list { display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+    .edl-photo { position:relative; width:96px; }
+    .edl-photo img { width:100%; height:72px; object-fit:cover; border-radius:4px; border:1px solid #cbd5e1; display:block; }
+    .photo-del { position:absolute; top:2px; right:2px; background:rgba(185,28,28,.92); color:#fff; font-size:10px; line-height:1; padding:3px 5px; border-radius:4px; }
+    .sealed .photo-del, .sealed .cam-btn { display:none !important; }
+    @media print {
+      .edl-photo { width:48%; break-inside:avoid; page-break-inside:avoid; }
+      .edl-photo img { height:auto; max-height:11cm; object-fit:contain; }
+    }
     .signature-canvas {
       touch-action: none;
       border: 2px dashed #cbd5e1;
@@ -26,7 +35,7 @@
   <header class="bg-slate-900 text-white p-4 shadow-md no-print">
     <div class="max-w-7xl mx-auto flex justify-between items-center">
       <h1 class="text-xl font-bold tracking-wide">Gestion des états des lieux et suivis des locataires</h1>
-      <span class="text-xs bg-slate-800 text-slate-300 px-3 py-1 rounded-full border border-slate-700">Gestion Immobilière</span>
+      <div class="flex items-center gap-2"><span id="sync-status" class="text-xs bg-slate-800 text-slate-300 px-3 py-1 rounded-full border border-slate-700">… Connexion au serveur</span><span class="text-xs bg-slate-800 text-slate-300 px-3 py-1 rounded-full border border-slate-700">Gestion Immobilière</span></div>
     </div>
   </header>
 
@@ -149,7 +158,8 @@
                 <select id="filter-dateSortie" onchange="filterTenantTable()" class="w-full text-slate-800 font-normal p-1 rounded text-[11px] bg-white border"><option value="">-- Toutes --</option></select>
               </th>
               <th class="p-3 border-r border-slate-700">EDL Entrée (Signé)</th>
-              <th class="p-3">EDL Sortie (Signé)</th>
+              <th class="p-3 border-r border-slate-700">EDL Sortie (Signé)</th>
+              <th class="p-3 col-actions">Actions</th>
             </tr>
           </thead>
           <tbody id="tenant-table-body" class="divide-y divide-slate-200 bg-white">
@@ -371,6 +381,24 @@
       </div>
     </section>
 
+    <!-- MODAL MODIFIER LOCATAIRE -->
+    <div id="modal-edit-tenant" class="hidden fixed inset-0 bg-slate-900/50 flex items-center justify-center p-4 z-50 no-print">
+      <div class="bg-white rounded-xl shadow-lg max-w-md w-full p-6 space-y-3">
+        <h3 class="text-lg font-bold text-slate-900">Modifier le locataire</h3>
+        <div class="text-xs space-y-3">
+          <div><label class="block font-medium mb-1">Appartement (non modifiable)</label><input type="text" id="edit-t-app" readonly class="w-full border rounded p-2 bg-slate-100 text-slate-500"></div>
+          <div><label class="block font-medium mb-1">Occupant(s) : nom et prénom</label><input type="text" id="edit-t-label" class="w-full border rounded p-2 bg-white"></div>
+          <div><label class="block font-medium mb-1">Adresse</label><input type="text" id="edit-t-adresse" class="w-full border rounded p-2 bg-white"></div>
+          <div><label class="block font-medium mb-1">N° de téléphone <span class="text-slate-400">(plusieurs numéros : séparés par « / »)</span></label><input type="text" id="edit-t-tel" class="w-full border rounded p-2 bg-white"></div>
+          <div><label class="block font-medium mb-1">Adresse e-mail <span class="text-slate-400">(plusieurs adresses : séparées par « / »)</span></label><input type="text" id="edit-t-email" class="w-full border rounded p-2 bg-white"></div>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeEditTenant()" class="border px-4 py-2 rounded-lg text-sm text-slate-600">Annuler</button>
+          <button type="button" onclick="saveEditedTenant()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+
     <!-- MODAL CHOIX TRAME -->
     <div id="modal-trame" class="hidden fixed inset-0 bg-slate-900/50 flex items-center justify-center p-4 z-50">
       <div class="bg-white rounded-xl shadow-lg max-w-md w-full p-6 space-y-4">
@@ -446,7 +474,7 @@
             <div><label class="block font-medium mb-1">Parties communes</label><input type="number" min="0" value="0" class="w-full border rounded p-2"></div>
             <div><label class="block font-medium mb-1">Boîte aux lettres</label><input type="number" min="0" value="0" class="w-full border rounded p-2"></div>
             <div id="sci-ah-keys-1" class="hidden"><label class="block font-medium mb-1">Badges Vigik</label><input type="number" min="0" value="0" class="w-full border rounded p-2"></div>
-            <div id="sci-ah-keys-2" class="hidden"><label class="block font-medium mb-1">Visiophone</label><select class="w-full border rounded p-2 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div>
+            <div id="sci-ah-keys-2" class="hidden"><label class="block font-medium mb-1">Visiophone</label><select class="w-full border rounded p-2 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option><option>Sans</option></select></div>
           </div>
           <input type="text" placeholder="Notes sur les clés et accès (1 ligne)..." class="w-full border rounded p-1.5 bg-white text-xs mt-2">
         </div>
@@ -525,7 +553,7 @@
             <button type="button" id="btn-validate-seal" onclick="validateAndSignInspection()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-6 py-2.5 rounded-lg text-sm shadow-sm transition-all">
               ✅ 1. Valider et sceller définitivement
             </button>
-            <button type="button" id="btn-print-pdf" onclick="window.print()" class="hidden bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2.5 rounded-lg text-sm shadow-sm transition-all">
+            <button type="button" id="btn-print-pdf" onclick="printEdl()" class="hidden bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2.5 rounded-lg text-sm shadow-sm transition-all">
               🖨️ 2. Imprimer / Enregistrer en PDF
             </button>
           </div>
@@ -539,7 +567,7 @@
     var LOGEMENTS_DATA = {
       "21 rue Alphonse Helbronner, 93400 Saint-Ouen-sur-Seine": ["F3 rez-de-chaussée", "F3 1er étage gauche", "F2 1er étage droite", "F3 2ème étage gauche", "F2 2ème étage droite", "F3 3ème étage droite", "F4 3ème étage gauche"],
       "19 rue Alphonse Helbronner, 93400 Saint-Ouen-sur-Seine": ["Studio sur rue", "Studio sur cour", "F2 fond de cour", "F2 cour accès par le 19", "F3 1er étage", "F3 2ème étage"],
-      "33 rue des Rosiers, 93400 Saint-Ouen-sur-Seine": ["Boutique Rdc", "Appartement 1er étage droite", "Appartement 1er étage gauche", "Appartement 2ème étage droite", "Appartement 2ème étage couloir droite", "Appartement 2ème étage couloir gauche", "Appartement 3ème étage droite", "Appartement 3ème étage couloir droite", "Appartement 3ème étage couloir gauche", "Appartement 4ème étage droite", "Appartement 4ème étage couloir droite", "Appartement 4ème étage couloir gauche", "Appartement 5ème étage droite", "Appartement 5ème étage couloir droite", "Appartement 5ème étage couloir gauche", "Pavillon 1 rue JBC"]
+      "33 rue des Rosiers, 93400 Saint-Ouen-sur-Seine": ["Boutique Rdc", "Appartement 1er étage droite", "Appartement 1er étage gauche (Loge)", "Appartement 2ème étage droite", "Appartement 2ème étage couloir droite", "Appartement 2ème étage couloir gauche", "Appartement 3ème étage droite", "Appartement 3ème étage couloir droite", "Appartement 3ème étage couloir gauche", "Appartement 4ème étage droite", "Appartement 4ème étage couloir droite", "Appartement 4ème étage couloir gauche", "Appartement 5ème étage droite", "Appartement 5ème étage couloir droite", "Appartement 5ème étage couloir gauche", "Pavillon 1 rue JBC"]
     };
 
     var SCI_DATA = {
@@ -547,11 +575,11 @@
       SCI_2: { nom: "SCI AH", prefixAH19: "AH19", prefixAH21: "AH21", siege: "33 rue des Rosiers, 93400 Saint-Ouen-sur-Seine" }
     };
 
-    var savedTenants = {
+    var DEFAULT_TENANTS = {
       SCI_1: [
         { appartement: "Boutique Rdc", dateEntree: "", label: "Société LOCLA", tel: "", email: "", dateSortie: "" },
-        { appartement: "Appartement 1er étage droite", dateEntree: "", label: "Vide", tel: "", email: "", dateSortie: "" },
-        { appartement: "Appartement 1er étage gauche", dateEntree: "", label: "Thomas LESIGNE & Karolina ORZELEL", tel: "06 17 13 38 70 / 06 25 36 62 87", email: "lesignethomas@gmail.com", dateSortie: "" },
+        { appartement: "Appartement 1er étage droite", dateEntree: "", label: "Thomas LESIGNE & Karolina ORZELEL", tel: "06 17 13 38 70 / 06 25 36 62 87", email: "lesignethomas@gmail.com", dateSortie: "" },
+        { appartement: "Appartement 1er étage gauche (Loge)", dateEntree: "", label: "Vide", tel: "", email: "", dateSortie: "" },
         { appartement: "Appartement 2ème étage droite", dateEntree: "", label: "Nicolas Olivares", tel: "07 81 15 92 47", email: "nico.olivares@gmail.com", dateSortie: "" },
         { appartement: "Appartement 2ème étage couloir droite", dateEntree: "", label: "Ioanna MAROUGKA & Kallioppi GARDERI", tel: "07 51 26 31 40", email: "joemarougka@gmail.com", dateSortie: "" },
         { appartement: "Appartement 2ème étage couloir gauche", dateEntree: "", label: "Paul Etienne GARDE", tel: "06 78 94 26 35", email: "garde.pauletienne@hotmail.fr", dateSortie: "" },
@@ -578,9 +606,12 @@
         { appartement: "F2 cour accès par le 19", dateEntree: "", label: "Lucie ALAPETITE", tel: "06 33 51 48 87", email: "oraetlabora7@free.fr", dateSortie: "" },
         { appartement: "Studio sur rue (19)", dateEntree: "", label: "Yoan Robert NAUDIN", tel: "07 49 44 38 49", email: "yrobertnaudin@gmail.com", dateSortie: "" },
         { appartement: "Studio sur cour (19)", dateEntree: "", label: "Aymeric TRIONFO", tel: "07 66 06 16 54", email: "trionfoaymeric@gmail.com", dateSortie: "" },
-        { appartement: "F3 1er étage (19)", dateEntree: "", label: "Chloé MEUDEC-CUTTING & Fadwa CHAID", tel: "06 56 66 31 22 / 06 10 62 36 45", email: "cloemeudec-cutting@outlook.com", dateSortie: "" }
+        { appartement: "F3 1er étage (19)", dateEntree: "", label: "Mme LAURENT Danielle", tel: "06 20 86 88 35", email: "laurent.danielle@outlook.fr", dateSortie: "" },
+        { appartement: "F3 2ème étage (19)", dateEntree: "", label: "Chloé MEUDEC-CUTTING & Fadwa CHAID", tel: "06 56 66 31 22 / 06 10 62 36 45", email: "cloemeudec-cutting@outlook.com", dateSortie: "" }
       ]
     };
+
+    var savedTenants = JSON.parse(JSON.stringify(DEFAULT_TENANTS));
 
     var selectedSciKey = null;
     var selectedAddress = null;
@@ -658,7 +689,7 @@
       tbody.innerHTML = '';
       var list = savedTenants[selectedSciKey] || [];
       if(list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="p-4 text-center text-slate-500 italic">Aucun locataire enregistré pour cette SCI.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="p-4 text-center text-slate-500 italic">Aucun locataire enregistré pour cette SCI.</td></tr>';
         return;
       }
 
@@ -687,22 +718,25 @@
         if(fDateSort && dtSort !== fDateSort) continue;
 
         visibleCount++;
+        var linkEntree = t.edlEntree ? '<a href="' + esc(t.edlEntree) + '" target="_blank" rel="noopener" class="text-blue-600 underline">📄 Voir l\'EDL</a>' : '<span class="text-slate-400 italic">Document non généré</span>';
+        var linkSortie = t.edlSortie ? '<a href="' + esc(t.edlSortie) + '" target="_blank" rel="noopener" class="text-blue-600 underline">📄 Voir l\'EDL</a>' : '<span class="text-slate-400 italic">Document non généré</span>';
         var tr = document.createElement('tr');
         tr.className = "hover:bg-slate-50 transition-all text-xs";
-        tr.innerHTML = 
-          '<td class="p-3 border-r border-slate-200 font-medium text-slate-900">' + app + '</td>' +
-          '<td class="p-3 border-r border-slate-200 text-slate-600">' + dtEnt + '</td>' +
-          '<td class="p-3 border-r border-slate-200 font-semibold text-slate-800">' + occ + '</td>' +
-          '<td class="p-3 border-r border-slate-200 text-slate-600">' + tel + '</td>' +
-          '<td class="p-3 border-r border-slate-200 text-blue-600 underline">' + email + '</td>' +
-          '<td class="p-3 border-r border-slate-200 text-slate-600">' + dtSort + '</td>' +
-          '<td class="p-3 border-r border-slate-200 text-slate-400 italic">Document non généré</td>' +
-          '<td class="p-3 text-slate-400 italic">Document non généré</td>';
+        tr.innerHTML =
+          '<td class="p-3 border-r border-slate-200 font-medium text-slate-900">' + esc(app) + '</td>' +
+          '<td class="p-3 border-r border-slate-200 text-slate-600">' + esc(dtEnt) + '</td>' +
+          '<td class="p-3 border-r border-slate-200 font-semibold text-slate-800">' + esc(occ) + '</td>' +
+          '<td class="p-3 border-r border-slate-200 text-slate-600">' + esc(tel) + '</td>' +
+          '<td class="p-3 border-r border-slate-200 text-blue-600 underline">' + esc(email) + '</td>' +
+          '<td class="p-3 border-r border-slate-200 text-slate-600">' + esc(dtSort) + '</td>' +
+          '<td class="p-3 border-r border-slate-200">' + linkEntree + '</td>' +
+          '<td class="p-3 border-r border-slate-200">' + linkSortie + '</td>' +
+          '<td class="p-3 col-actions"><button type="button" onclick="openEditTenant(' + i + ')" class="border border-slate-300 hover:bg-slate-100 text-slate-700 px-2 py-1 rounded whitespace-nowrap">✏️ Modifier</button></td>';
         tbody.appendChild(tr);
       }
 
       if(visibleCount === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="p-4 text-center text-slate-500 italic">Aucun résultat ne correspond aux filtres sélectionnés.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="p-4 text-center text-slate-500 italic">Aucun résultat ne correspond aux filtres sélectionnés.</td></tr>';
       }
     }
 
@@ -723,7 +757,9 @@
         if(rows[i].style.display === 'none') continue;
         var row = [], cols = rows[i].querySelectorAll('th, td');
         for(var j=0; j<cols.length; j++) {
-          var text = cols[j].innerText.replace(/[\n\r]+/g, ' ').trim();
+          if(cols[j].classList.contains('col-actions')) continue;
+          var link = cols[j].querySelector('a');
+          var text = link ? link.href : cols[j].innerText.replace(/[\n\r]+/g, ' ').trim();
           row.push('"' + text.replace(/"/g, '""') + '"');
         }
         csv.push(row.join(';'));
@@ -739,6 +775,7 @@
     }
 
     function goBackToHome() {
+      document.title = BASE_TITLE;
       var ids = ['step-building', 'step-tenant-list', 'step-logement', 'step-tenant', 'step-inspection'];
       for(var i=0; i<ids.length; i++) {
         var el = document.getElementById(ids[i]);
@@ -847,7 +884,7 @@
         var div = document.createElement('label');
         div.className = "flex items-center space-x-2 text-xs p-1 hover:bg-slate-100 rounded cursor-pointer";
         div.innerHTML = '<input type="checkbox" name="selected_tenant_chk" value="' + i + '" class="rounded text-blue-600 focus:ring-blue-500"> ' +
-                        '<span class="font-medium text-slate-800">' + occupantName + '</span> <span class="text-slate-400 text-[11px]">(' + (t.appartement || 'Lot non spécifié') + ')</span>';
+                        '<span class="font-medium text-slate-800">' + esc(occupantName) + '</span> <span class="text-slate-400 text-[11px]">(' + esc(t.appartement || 'Lot non spécifié') + ')</span>';
         container.appendChild(div);
       }
     }
@@ -876,7 +913,7 @@
         if(email && !validateEmail(email)) { alert("Erreur : Format e-mail invalide."); return null; }
         if(tel && !validatePhone(tel)) { alert("Erreur : Numéro de téléphone invalide."); return null; }
 
-        tenantData = { appartement: selectedLogement, dateEntree: (selectedEdlType === 'Entrée' ? todayDate : ''), label: societe + " (Représenté par " + nom + " " + prenom + ")", tel: tel, email: email, siege: siege, dateSortie: '' };
+        tenantData = { appartement: selectedLogement, dateEntree: '', label: societe + " (Représenté par " + nom + " " + prenom + ")", tel: tel, email: email, siege: siege, dateSortie: '' };
       } else {
         var nom1 = formatName(document.getElementById('t-nom-1').value);
         var prenom1 = formatFirstName(document.getElementById('t-prenom-1').value);
@@ -899,13 +936,14 @@
           if(email2 && !validateEmail(email2)) { alert("Erreur : Format e-mail invalide du second colocataire."); return null; }
           if(tel2 && !validatePhone(tel2)) { alert("Erreur : Téléphone invalide du second colocataire."); return null; }
 
-          tenantData = { appartement: selectedLogement, dateEntree: (selectedEdlType === 'Entrée' ? todayDate : ''), label: civ + " " + nom1 + " " + prenom1 + " & " + nom2 + " " + prenom2, tel: tel1 + (tel2 ? ' / ' + tel2 : ''), email: email1 + (email2 ? ' / ' + email2 : ''), adresse: adresse1, dateSortie: '' };
+          tenantData = { appartement: selectedLogement, dateEntree: '', label: civ + " " + nom1 + " " + prenom1 + " & " + nom2 + " " + prenom2, tel: tel1 + (tel2 ? ' / ' + tel2 : ''), email: email1 + (email2 ? ' / ' + email2 : ''), adresse: adresse1, dateSortie: '' };
         } else {
-          tenantData = { appartement: selectedLogement, dateEntree: (selectedEdlType === 'Entrée' ? todayDate : ''), label: civ + " " + nom1 + " " + prenom1, tel: tel1, email: email1, adresse: adresse1, dateSortie: '' };
+          tenantData = { appartement: selectedLogement, dateEntree: '', label: civ + " " + nom1 + " " + prenom1, tel: tel1, email: email1, adresse: adresse1, dateSortie: '' };
         }
       }
 
       savedTenants[selectedSciKey].push(tenantData);
+      saveTenants();
 
       var feedback = document.getElementById('save-feedback');
       if(feedback) feedback.classList.remove('hidden');
@@ -953,6 +991,45 @@
 
     function initInspection(source) {
       document.getElementById('modal-trame').classList.add('hidden');
+      if(source !== 'precedent') { buildInspection('vierge'); return; }
+      fetch('/api/edl/last?address=' + encodeURIComponent(selectedAddress) + '&logement=' + encodeURIComponent(selectedLogement), { cache: 'no-store' })
+        .then(function(r) {
+          if(r.status === 404) return null;
+          if(!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        })
+        .then(function(prev) {
+          if(!prev) {
+            buildInspection('vierge');
+            alert("Aucun constat précédent enregistré pour ce logement : un constat vierge a été créé.");
+            return;
+          }
+          buildInspection('precedent');
+          var ok = applyState(prev.state);
+          if(!ok) {
+            buildInspection('vierge');
+            alert("Le constat précédent ne correspond plus à la structure actuelle du logement : un constat vierge a été créé.");
+            return;
+          }
+          var note = document.createElement('div');
+          note.className = 'no-print text-xs bg-amber-50 border border-amber-300 text-amber-900 rounded-lg p-3';
+          note.textContent = "Constat initialisé à partir du précédent (" + prev.title + "). Vérifiez et modifiez si nécessaire (photos comprises) puis faites signer à nouveau.";
+          var card = document.getElementById('step-inspection').firstElementChild;
+          if(card) card.insertAdjacentElement('afterbegin', note);
+        })
+        .catch(function() {
+          buildInspection('vierge');
+          alert("Serveur injoignable : impossible de récupérer le constat précédent. Un constat vierge a été créé.");
+        });
+    }
+
+    function buildInspection(source) {
+      var _root = document.getElementById('step-inspection');
+      if(INSPECTION_TEMPLATE !== null) _root.innerHTML = INSPECTION_TEMPLATE;
+      _root.classList.remove('sealed');
+      document.title = BASE_TITLE;
+      currentSealedTitle = '';
+      document.getElementById('modal-trame').classList.add('hidden');
       document.getElementById('step-tenant').classList.add('hidden');
       document.getElementById('step-inspection').classList.remove('hidden');
 
@@ -989,7 +1066,7 @@
           '<p class="text-slate-500 italic mt-2">Production d\'eau chaude par ballon d\'eau chaude en cave.</p>';
       } else {
         var loc = "dans la cuisine";
-        if(selectedLogement.indexOf('fond de cour') > -1 || selectedLogement.indexOf('accès par le 19') > -1) loc = "dans la salle d'eau";
+        if(selectedLogement.indexOf('fond de cour') > -1) loc = "dans la salle d'eau";
         if(selectedLogement === 'Pavillon 1 rue JBC') loc = "dans la cave";
 
         var html = '<p><strong>Chaudière individuelle au gaz (' + loc + ') :</strong></p>' +
@@ -1014,6 +1091,7 @@
       } else if(selectedSciKey === 'SCI_2') {
         buildSciAhRooms();
       }
+      enhancePhotoInputs();
       initSignaturesCanvas();
     }
 
@@ -1141,9 +1219,9 @@
         return;
       }
 
-      var isF3_5e = (log.indexOf('5ème') > -1);
-      var isF3 = (log.indexOf('F3') > -1);
-      var isF2 = (log.indexOf('F2') > -1);
+      // Règle : les appartements "droite" (sans "couloir") sont des F3, tous les autres des F2
+      var isF3 = (log.indexOf('droite') > -1 && log.indexOf('couloir') === -1);
+      var isF3_5e = isF3 && (log.indexOf('5ème') > -1);
 
       if(isF3_5e) {
         container.innerHTML += buildBaseRoomHTML(6, "Entrée");
@@ -1153,17 +1231,18 @@
         container.innerHTML += buildBaseRoomHTML(10, "Salle de bains RDC", extraSdbSansWc);
         container.innerHTML += buildBaseRoomHTML(11, "WC", extraWcIndependant);
         container.innerHTML += buildBaseRoomHTML(12, "Escalier", extraEscalier);
-        container.innerHTML += buildBaseRoomHTML(13, "Chambre 1er étage");
+        container.innerHTML += buildBaseRoomHTML(13, "Chambre 1er étage", itemPlacard("Placard"));
         container.innerHTML += buildBaseRoomHTML(14, "Salle de bains 1er étage", extraSdbSansWc);
       } else if(isF3) {
         container.innerHTML += buildBaseRoomHTML(6, "Entrée");
         container.innerHTML += buildBaseRoomHTML(7, "Cuisine", extraCuisine);
         container.innerHTML += buildBaseRoomHTML(8, "Salon");
-        container.innerHTML += buildBaseRoomHTML(9, "Chambre 1 sur cour");
-        container.innerHTML += buildBaseRoomHTML(10, "Chambre 2 sur rue");
+        container.innerHTML += buildBaseRoomHTML(9, "Chambre sur cour");
+        container.innerHTML += buildBaseRoomHTML(10, "Chambre sur rue");
         container.innerHTML += buildBaseRoomHTML(11, "Salle de bains", extraSdbSansWc);
         container.innerHTML += buildBaseRoomHTML(12, "WC", extraWcIndependant);
-      } else if(isF2) {
+      } else {
+        // F2 (1er gauche (Loge) et tous les "couloir")
         container.innerHTML += buildBaseRoomHTML(6, "Entrée", itemPlacard("Placard"));
         container.innerHTML += buildBaseRoomHTML(7, "Cuisine", extraCuisine);
         container.innerHTML += buildBaseRoomHTML(8, "Salon");
@@ -1195,6 +1274,8 @@
       container.innerHTML = '';
       var log = selectedLogement;
       var addr = selectedAddress;
+      // 21 rue AH : 2 placards dans le couloir des F3 (sauf F3 3ème étage droite) et du F4
+      var couloir2 = (log === 'F3 3ème étage droite') ? '' : (itemPlacard("Placard 1") + itemPlacard("Placard 2"));
 
       var extraStudioMix = '<div class="space-y-2 border p-3 rounded bg-slate-50 mt-3"><span class="font-bold block text-slate-800">Évier & Équipements Cuisine Ouverte</span><div class="grid grid-cols-2 md:grid-cols-4 gap-2"><div><label class="block">Type Évier :</label><select class="w-full border rounded p-1 bg-white"><option>Grès</option><option>Inox</option><option>PVC</option></select></div><div><label class="block">État Évier :</label><select class="w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div><div><label class="block">Robinetterie :</label><select class="w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option><option>Entartré</option></select></div><div><label class="block">Faïence :</label><select class="w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div><div><label class="block">Meuble sous évier :</label><select class="w-full border rounded p-1 bg-white"><option>Neuf</option><option>Bon état</option><option>Moyen</option><option>Mauvais</option></select></div></div><input type="text" placeholder="Notes sur l\'évier (1 ligne)..." class="w-full border rounded p-1.5 bg-white mt-1"><div class="flex gap-2 pt-1"><input type="file" accept="image/*" multiple class="w-full"><button type="button" onclick="alert(\'Ouverture caméra...\')" class="bg-slate-800 text-white px-2 py-1 rounded whitespace-nowrap">📷 Photo</button></div></div>';
 
@@ -1223,18 +1304,19 @@
           container.innerHTML += buildBaseRoomHTML(11, "Salle de bains", extraSdbSansWc);
           container.innerHTML += buildTerrasseRoomHTML(12, "Terrasse");
         } else if(log === 'F2 cour accès par le 19') {
-          container.innerHTML += buildBaseRoomHTML(6, "Séjour avec cuisine ouverte", extraStudioMix);
-          container.innerHTML += buildBaseRoomHTML(7, "WC", extraWcIndependant);
-          container.innerHTML += buildBaseRoomHTML(8, "Escalier", extraEscalier);
-          container.innerHTML += buildBaseRoomHTML(9, "Chambre");
-          container.innerHTML += buildBaseRoomHTML(10, "Salle de bains", extraSdbSansWc);
+          container.innerHTML += buildBaseRoomHTML(6, "Entrée", itemPlacard("Placard"));
+          container.innerHTML += buildBaseRoomHTML(7, "Séjour avec cuisine ouverte", extraStudioMix);
+          container.innerHTML += buildBaseRoomHTML(8, "WC", extraWcIndependant);
+          container.innerHTML += buildBaseRoomHTML(9, "Escalier", extraEscalier);
+          container.innerHTML += buildBaseRoomHTML(10, "Chambre", itemPlacard("Placard"));
+          container.innerHTML += buildBaseRoomHTML(11, "Salle de bains", extraSdbSansWc);
         }
       }
 
       if(addr === '21 rue Alphonse Helbronner, 93400 Saint-Ouen-sur-Seine') {
         if(log === 'F3 rez-de-chaussée') {
           container.innerHTML += buildBaseRoomHTML(6, "Salon sur cuisine ouverte", extraStudioMix + itemPlacard("Placard"));
-          container.innerHTML += buildBaseRoomHTML(7, "Couloir");
+          container.innerHTML += buildBaseRoomHTML(7, "Couloir", couloir2);
           container.innerHTML += buildBaseRoomHTML(8, "Chambre 1 sur rue", itemPlacard("Placard 1") + itemPlacard("Placard 2"));
           container.innerHTML += buildBaseRoomHTML(9, "Chambre 2 sur cour", itemPlacard("Placard"));
           container.innerHTML += buildTerrasseRoomHTML(10, "Terrasse");
@@ -1242,14 +1324,14 @@
           container.innerHTML += buildBaseRoomHTML(12, "Salle de bains", extraSdbSansWc);
         } else if(log.indexOf('F3') > -1) {
           container.innerHTML += buildBaseRoomHTML(6, "Salon sur cuisine ouverte", extraStudioMix + itemPlacard("Placard"));
-          container.innerHTML += buildBaseRoomHTML(7, "Couloir");
+          container.innerHTML += buildBaseRoomHTML(7, "Couloir", couloir2);
           container.innerHTML += buildBaseRoomHTML(8, "Chambre 1 sur rue", itemPlacard("Placard 1") + itemPlacard("Placard 2"));
           container.innerHTML += buildBaseRoomHTML(9, "Chambre 2 sur cour", itemPlacard("Placard"));
           container.innerHTML += buildBaseRoomHTML(10, "WC", extraWcIndependant);
           container.innerHTML += buildBaseRoomHTML(11, "Salle de bains", extraSdbSansWc);
         } else if(log.indexOf('F2') > -1) {
           container.innerHTML += buildBaseRoomHTML(6, "Séjour sur cuisine ouverte", extraStudioMix);
-          container.innerHTML += buildBaseRoomHTML(7, "Couloir");
+          container.innerHTML += buildBaseRoomHTML(7, "Couloir", itemPlacard("Placard"));
           container.innerHTML += buildBaseRoomHTML(8, "Chambre", itemPlacard("Placard"));
           container.innerHTML += buildBaseRoomHTML(9, "Salle de bains", extraSdbAvecWc);
         } else if(log === 'F3 3ème étage droite') {
@@ -1264,7 +1346,7 @@
           container.innerHTML += buildTerrasseRoomHTML(14, "Terrasse");
         } else if(log === 'F4 3ème étage gauche') {
           container.innerHTML += buildBaseRoomHTML(6, "Salon sur cuisine ouverte", extraStudioMix + itemPlacard("Placard"));
-          container.innerHTML += buildBaseRoomHTML(7, "Couloir");
+          container.innerHTML += buildBaseRoomHTML(7, "Couloir", couloir2);
           container.innerHTML += buildBaseRoomHTML(8, "Chambre rdc sur cour", itemPlacard("Placard"));
           container.innerHTML += buildBaseRoomHTML(9, "Chambre rdc sur rue", itemPlacard("Placard"));
           container.innerHTML += buildBaseRoomHTML(10, "Escalier", extraEscalier);
@@ -1356,33 +1438,379 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
+    // =====================================================================
+    //  UTILITAIRES
+    // =====================================================================
+    var BASE_TITLE = document.title;
+    var INSPECTION_TEMPLATE = null;
+    var currentSealedTitle = '';
+    var lastSealPayload = null;
+
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    function slugify(str) {
+      return String(str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    }
+    function formatDateFr(iso) {
+      var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+      if (!m) return new Date().toLocaleDateString('fr-FR');
+      return m[3] + '/' + m[2] + '/' + m[1];
+    }
+
+    // =====================================================================
+    //  SYNCHRONISATION AVEC LE SERVEUR (locataires)
+    // =====================================================================
+    var tenantsLoaded = false;
+
+    function setSyncStatus(kind) {
+      var el = document.getElementById('sync-status');
+      if (!el) return;
+      if (kind === 'ok') { el.textContent = '● Données synchronisées'; el.className = 'text-xs px-3 py-1 rounded-full border border-emerald-700 bg-emerald-900/40 text-emerald-300'; }
+      else if (kind === 'loading') { el.textContent = '… Connexion au serveur'; el.className = 'text-xs px-3 py-1 rounded-full border border-slate-700 bg-slate-800 text-slate-300'; }
+      else { el.textContent = '⚠ Serveur injoignable – cliquer pour réessayer'; el.className = 'text-xs px-3 py-1 rounded-full border border-amber-600 bg-amber-900/40 text-amber-200 cursor-pointer'; }
+    }
+
+    function loadTenantsFromServer() {
+      setSyncStatus('loading');
+      return fetch('/api/tenants', { cache: 'no-store' })
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(function (res) {
+          if (res && res.data && Array.isArray(res.data.SCI_1) && Array.isArray(res.data.SCI_2)) {
+            savedTenants = res.data;
+            tenantsLoaded = true;
+            setSyncStatus('ok');
+          } else {
+            // Serveur vide : on initialise avec la liste de départ
+            tenantsLoaded = true;
+            return saveTenants(true);
+          }
+        })
+        .catch(function () { tenantsLoaded = false; setSyncStatus('error'); });
+    }
+
+    function saveTenants(silent) {
+      if (!tenantsLoaded) {
+        if (!silent) alert("⚠️ Le serveur est injoignable : la modification n'est PAS enregistrée durablement. Vérifiez la connexion puis cliquez sur le bandeau d'état en haut de page.");
+        return Promise.resolve(false);
+      }
+      return fetch('/api/tenants', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(savedTenants) })
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); setSyncStatus('ok'); return true; })
+        .catch(function () {
+          setSyncStatus('error');
+          if (!silent) alert("⚠️ Échec de l'enregistrement sur le serveur. La modification n'est pas sauvegardée durablement.");
+          return false;
+        });
+    }
+
+    // =====================================================================
+    //  MODIFIER UN LOCATAIRE
+    // =====================================================================
+    var editingTenantIndex = null;
+
+    function openEditTenant(i) {
+      var list = savedTenants[selectedSciKey] || [];
+      var t = list[i];
+      if (!t) return;
+      editingTenantIndex = i;
+      document.getElementById('edit-t-app').value = t.appartement || '';
+      document.getElementById('edit-t-label').value = t.label || '';
+      document.getElementById('edit-t-adresse').value = (t.adresse !== undefined ? t.adresse : (t.siege || '')) || '';
+      document.getElementById('edit-t-tel').value = t.tel || '';
+      document.getElementById('edit-t-email').value = t.email || '';
+      document.getElementById('modal-edit-tenant').classList.remove('hidden');
+    }
+
+    function closeEditTenant() {
+      document.getElementById('modal-edit-tenant').classList.add('hidden');
+      editingTenantIndex = null;
+    }
+
+    function saveEditedTenant() {
+      var list = savedTenants[selectedSciKey] || [];
+      var t = list[editingTenantIndex];
+      if (!t) { closeEditTenant(); return; }
+      var label = document.getElementById('edit-t-label').value.trim();
+      var adresse = document.getElementById('edit-t-adresse').value.trim();
+      var tel = document.getElementById('edit-t-tel').value.trim();
+      var email = document.getElementById('edit-t-email').value.trim();
+
+      if (!label) { alert("Le nom de l'occupant ne peut pas être vide."); return; }
+      var tels = tel ? tel.split('/') : [];
+      for (var a = 0; a < tels.length; a++) {
+        if (tels[a].trim() && !validatePhone(tels[a].trim())) { alert("Erreur : numéro de téléphone invalide (« " + tels[a].trim() + " »). Pour plusieurs numéros, séparez-les par « / »."); return; }
+      }
+      var emails = email ? email.split('/') : [];
+      for (var b = 0; b < emails.length; b++) {
+        if (emails[b].trim() && !validateEmail(emails[b].trim())) { alert("Erreur : adresse e-mail invalide (« " + emails[b].trim() + " »). Pour plusieurs adresses, séparez-les par « / »."); return; }
+      }
+
+      t.label = label;
+      t.tel = tel;
+      t.email = email;
+      if (t.adresse !== undefined || t.siege === undefined) t.adresse = adresse; else t.siege = adresse;
+
+      saveTenants().then(function () {
+        closeEditTenant();
+        populateFilterDropdowns();
+        renderTenantTable();
+      });
+    }
+
+    // =====================================================================
+    //  PHOTOS : compression, miniatures, suppression
+    // =====================================================================
+    var PHOTO_MAX_SIDE = 1400;
+
+    function compressImage(file) {
+      return new Promise(function (resolve, reject) {
+        var fr = new FileReader();
+        fr.onerror = function () { reject(new Error('lecture')); };
+        fr.onload = function () {
+          var img = new Image();
+          img.onerror = function () { reject(new Error('image')); };
+          img.onload = function () {
+            try {
+              var w = img.naturalWidth, h = img.naturalHeight;
+              var s = Math.min(1, PHOTO_MAX_SIDE / Math.max(w, h));
+              var c = document.createElement('canvas');
+              c.width = Math.max(1, Math.round(w * s));
+              c.height = Math.max(1, Math.round(h * s));
+              c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+              resolve(c.toDataURL('image/jpeg', 0.75));
+            } catch (e) { reject(e); }
+          };
+          img.src = fr.result;
+        };
+        fr.readAsDataURL(file);
+      });
+    }
+
+    function addPhotoThumb(list, dataUrl) {
+      var d = document.createElement('div');
+      d.className = 'edl-photo';
+      var img = document.createElement('img');
+      img.src = dataUrl;
+      img.alt = 'Photo';
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'photo-del no-print';
+      b.textContent = '✕ Supprimer';
+      b.onclick = function () { if (confirm('Supprimer cette photo ?')) d.remove(); };
+      d.appendChild(img);
+      d.appendChild(b);
+      list.appendChild(d);
+    }
+
+    function handlePhotoFiles(input) {
+      var list = input.__photoList;
+      var files = Array.prototype.slice.call(input.files || []);
+      if (!list || files.length === 0) return;
+      var chain = Promise.resolve();
+      files.forEach(function (f) {
+        chain = chain.then(function () {
+          return compressImage(f).then(function (url) { addPhotoThumb(list, url); })
+            .catch(function () { alert("Impossible de lire cette image : " + (f.name || 'fichier')); });
+        });
+      });
+      chain.then(function () { try { input.value = ''; } catch (e) { /* ignore */ } });
+    }
+
+    function enhancePhotoInputs() {
+      try {
+        var root = document.getElementById('step-inspection');
+        var inputs = root.querySelectorAll('input[type="file"]');
+        Array.prototype.forEach.call(inputs, function (fi) {
+          if (fi.dataset.photoReady) return;
+          fi.dataset.photoReady = '1';
+          var row = fi.parentElement;
+          var list = document.createElement('div');
+          list.className = 'photo-list';
+          row.insertAdjacentElement('afterend', list);
+          fi.__photoList = list;
+          fi.addEventListener('change', function () { handlePhotoFiles(fi); });
+
+          var btn = row.querySelector('button');
+          if (btn && /Photo/.test(btn.textContent)) {
+            var cam = document.createElement('input');
+            cam.type = 'file';
+            cam.accept = 'image/*';
+            cam.setAttribute('capture', 'environment');
+            cam.dataset.photoReady = '1';
+            cam.style.cssText = 'position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;';
+            cam.tabIndex = -1;
+            row.appendChild(cam);
+            cam.__photoList = list;
+            cam.addEventListener('change', function () { handlePhotoFiles(cam); });
+            btn.removeAttribute('onclick');
+            btn.classList.add('cam-btn');
+            btn.onclick = function () { cam.click(); };
+          }
+        });
+      } catch (e) {
+        console.error('Photos : initialisation partielle', e);
+      }
+    }
+
+    // =====================================================================
+    //  ÉTAT DU CONSTAT (pour "repartir du précédent") ET INSTANTANÉ SCELLÉ
+    // =====================================================================
+    function getStateFields() {
+      var root = document.getElementById('step-inspection');
+      var all = root.querySelectorAll('input, select, textarea');
+      return Array.prototype.filter.call(all, function (el) { return el.type !== 'file' && el.id !== 'cart-date'; });
+    }
+
+    function collectState() {
+      var fields = getStateFields().map(function (el) {
+        if (el.type === 'checkbox' || el.type === 'radio') return !!el.checked;
+        return el.value;
+      });
+      var lists = document.querySelectorAll('#step-inspection .photo-list');
+      var photos = Array.prototype.map.call(lists, function (l) {
+        return Array.prototype.map.call(l.querySelectorAll('img'), function (i) { return i.src; });
+      });
+      return { v: 1, n: fields.length, fields: fields, photosN: lists.length, photos: photos };
+    }
+
+    function applyState(state) {
+      var els = getStateFields();
+      if (!state || state.n !== els.length || !state.fields) return false;
+      els.forEach(function (el, i) {
+        var v = state.fields[i];
+        if (el.type === 'checkbox' || el.type === 'radio') { el.checked = !!v; return; }
+        if (el.tagName === 'SELECT') {
+          for (var k = 0; k < el.options.length; k++) { if (el.options[k].value === v) { el.selectedIndex = k; break; } }
+        } else {
+          el.value = (v == null ? '' : v);
+        }
+      });
+      var lists = document.querySelectorAll('#step-inspection .photo-list');
+      if (state.photos && state.photosN === lists.length) {
+        Array.prototype.forEach.call(lists, function (l, idx) {
+          (state.photos[idx] || []).forEach(function (u) { addPhotoThumb(l, u); });
+        });
+      }
+      return true;
+    }
+
+    function syncFormAttributes(root) {
+      var els = root.querySelectorAll('input, select, textarea');
+      Array.prototype.forEach.call(els, function (el) {
+        if (el.tagName === 'SELECT') {
+          Array.prototype.forEach.call(el.options, function (o) { if (o.selected) o.setAttribute('selected', 'selected'); else o.removeAttribute('selected'); });
+        } else if (el.tagName === 'TEXTAREA') {
+          el.textContent = el.value;
+        } else if (el.type === 'checkbox' || el.type === 'radio') {
+          if (el.checked) el.setAttribute('checked', 'checked'); else el.removeAttribute('checked');
+        } else if (el.type !== 'file') {
+          el.setAttribute('value', el.value);
+        }
+      });
+    }
+
+    function buildSealedHtml(title) {
+      var root = document.getElementById('step-inspection');
+      syncFormAttributes(root);
+      var clone = root.cloneNode(true);
+      var origCanvases = root.querySelectorAll('canvas');
+      var cloneCanvases = clone.querySelectorAll('canvas');
+      Array.prototype.forEach.call(cloneCanvases, function (cc, i) {
+        var img = document.createElement('img');
+        try { img.src = origCanvases[i].toDataURL('image/png'); } catch (e) { /* ignore */ }
+        img.className = cc.className;
+        img.alt = 'Signature';
+        cc.parentNode.replaceChild(img, cc);
+      });
+      Array.prototype.forEach.call(clone.querySelectorAll('.no-print, button, input[type="file"], .photo-del, script'), function (n) { if (n.parentNode) n.parentNode.removeChild(n); });
+      var css = '';
+      Array.prototype.forEach.call(document.querySelectorAll('style'), function (s) { css += s.textContent + '\n'; });
+      return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+        '<title>' + esc(title) + '</title>' +
+        '<script src="https://cdn.tailwindcss.com"><\/script>' +
+        '<style>' + css + ' .snapshot .edl-photo{width:48%;} .snapshot .edl-photo img{height:auto;max-height:11cm;object-fit:contain;}</style>' +
+        '</head><body class="bg-slate-100 text-slate-800 font-sans"><div class="max-w-5xl mx-auto p-4 snapshot">' +
+        '<div class="no-print flex justify-end mb-3"><button type="button" onclick="window.print()" class="bg-blue-600 text-white font-medium px-5 py-2 rounded-lg text-sm">🖨️ Imprimer / Enregistrer en PDF</button></div>' +
+        clone.outerHTML + '</div></body></html>';
+    }
+
+    // =====================================================================
+    //  TITRE / NOM DE FICHIER
+    // =====================================================================
     function generateFormattedTitle() {
       var sciPrefix = SCI_DATA[selectedSciKey].prefix || (selectedAddress.indexOf('19') > -1 ? 'AH19' : 'AH21');
       var dateVal = document.getElementById('cart-date').value;
-      var dateFormatted = "16-Juil-26";
-      if(dateVal) {
-        var d = new Date(dateVal);
-        var months = ["Jan", "Fév", "Mars", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"];
-        dateFormatted = ("0" + d.getDate()).slice(-2) + "-" + months[d.getMonth()] + "-" + String(d.getFullYear()).slice(-2);
-      }
+      var months = ["Jan", "Fév", "Mars", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"];
+      var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateVal || '');
+      var d = m ? new Date(+m[1], +m[2] - 1, +m[3]) : new Date();
+      var dateFormatted = ("0" + d.getDate()).slice(-2) + "-" + months[d.getMonth()] + "-" + String(d.getFullYear()).slice(-2);
       var typeEDL = selectedEdlType;
-      var appSlug = selectedLogement.replace(/[^a-zA-Z0-9]/g, '-');
-      
-      var cleanLocs = currentTenantDataList.map(t => {
-        var raw = t.label || "Locataire";
-        return raw.replace(/^(Monsieur|Mme|Mr|M\.)\s+/gi, '').replace(/[^a-zA-Z0-9]/g, '-');
+      var appSlug = slugify(selectedLogement);
+
+      var cleanLocs = currentTenantDataList.map(function (t) {
+        var raw = (t.label || "Locataire").replace(/^(Mr et Mme|Mr et Mr|Mme et Mme|Personne morale|Monsieur|Madame|Mlle|Mme|Mr|M\.?)\s+/i, '');
+        return slugify(raw) || 'Locataire';
       }).join('_');
 
       return sciPrefix + "_" + dateFormatted + "_" + typeEDL + "_" + appSlug + "_" + cleanLocs;
     }
 
+    function printEdl() {
+      var t = currentSealedTitle || generateFormattedTitle();
+      document.title = t;
+      window.onafterprint = function () { window.onafterprint = null; };
+      window.print();
+    }
+
+    // =====================================================================
+    //  VALIDATION / SCELLEMENT + ENREGISTREMENT EN LIGNE
+    // =====================================================================
+    function applyTenantDatesAfterSeal(url) {
+      var dEdl = formatDateFr(document.getElementById('cart-date').value);
+      currentTenantDataList.forEach(function (t) {
+        if (selectedEdlType === 'Entrée') { t.dateEntree = dEdl; if (url) t.edlEntree = url; }
+        else if (selectedEdlType === 'Sortie') { t.dateSortie = dEdl; if (url) t.edlSortie = url; }
+      });
+    }
+
+    function uploadSealedEdl(payload) {
+      var st = document.getElementById('seal-status');
+      if (st) st.innerHTML = '⏳ Enregistrement en ligne en cours…';
+      return fetch('/api/edl', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(function (res) {
+          applyTenantDatesAfterSeal(res.url);
+          return saveTenants(true).then(function (ok) {
+            if (st) st.innerHTML = '✅ Constat enregistré en ligne : <a class="text-blue-600 underline" target="_blank" rel="noopener" href="' + esc(res.url) + '">ouvrir</a>' + (ok ? '' : ' — ⚠️ mais le tableau des locataires n\'a pas pu être sauvegardé.');
+            alert("✅ Constat validé, signé, scellé et enregistré en ligne.\n\nNom du document : " + payload.title + "\n\nLes dates et le lien ont été ajoutés au tableau de suivi des locataires." + (ok ? '' : "\n\n⚠️ Le tableau n'a pas pu être sauvegardé sur le serveur."));
+            return true;
+          });
+        })
+        .catch(function () {
+          applyTenantDatesAfterSeal(null);
+          saveTenants(true);
+          if (st) st.innerHTML = '⚠️ Enregistrement en ligne impossible. <button type="button" onclick="retrySealUpload()" class="underline text-blue-600">Réessayer</button>';
+          alert("⚠️ Constat validé et scellé, mais NON enregistré en ligne (serveur injoignable).\n\nImprimez ou enregistrez le PDF maintenant, puis utilisez « Réessayer » sous les boutons quand la connexion est rétablie.");
+          return false;
+        });
+    }
+
+    function retrySealUpload() {
+      if (lastSealPayload) uploadSealedEdl(lastSealPayload);
+    }
+
     function validateAndSignInspection() {
       var inputs = document.querySelectorAll('#step-inspection input, #step-inspection select, #step-inspection textarea');
-      inputs.forEach(el => el.disabled = true);
+      inputs.forEach(function (el) { el.disabled = true; });
+
+      var root = document.getElementById('step-inspection');
+      root.classList.add('sealed');
 
       var finalDocTitle = generateFormattedTitle();
+      currentSealedTitle = finalDocTitle;
+      document.title = finalDocTitle;
       var titleBanner = document.getElementById('doc-title-banner');
-      if(titleBanner) {
+      if (titleBanner) {
         titleBanner.innerText = "ÉTAT DES LIEUX OFFICIEL : " + finalDocTitle;
         titleBanner.classList.remove('hidden');
       }
@@ -1392,13 +1820,45 @@
       var btnVal = document.getElementById('btn-validate-seal');
       var btnPrint = document.getElementById('btn-print-pdf');
 
-      if(btnClear1) btnClear1.classList.add('hidden');
-      if(btnClear2) btnClear2.classList.add('hidden');
-      if(btnVal) btnVal.classList.add('hidden');
-      if(btnPrint) btnPrint.classList.remove('hidden');
+      if (btnClear1) btnClear1.classList.add('hidden');
+      if (btnClear2) btnClear2.classList.add('hidden');
+      if (btnVal) btnVal.classList.add('hidden');
+      if (btnPrint) btnPrint.classList.remove('hidden');
 
-      alert("✅ Constat validé, signé et scellé avec succès !\n\nNom du document : " + finalDocTitle + "\n\nLe document est verrouillé. Vous pouvez maintenant cliquer sur 'Imprimer / Enregistrer en PDF'.");
+      var payload;
+      try {
+        payload = {
+          title: finalDocTitle,
+          sciKey: selectedSciKey,
+          address: selectedAddress,
+          logement: selectedLogement,
+          type: selectedEdlType,
+          date: document.getElementById('cart-date').value,
+          tenants: currentTenantDataList.map(function (t) { return t.label; }),
+          state: collectState(),
+          html: buildSealedHtml(finalDocTitle)
+        };
+      } catch (e) {
+        console.error(e);
+        applyTenantDatesAfterSeal(null);
+        saveTenants(true);
+        alert("✅ Constat validé et scellé.\n\n⚠️ La copie en ligne n'a pas pu être préparée. Cliquez sur « Imprimer / Enregistrer en PDF » pour conserver le document.");
+        return;
+      }
+      lastSealPayload = payload;
+
+      var actions = document.getElementById('btn-print-pdf').parentElement.parentElement;
+      actions.insertAdjacentHTML('afterend', '<p id="seal-status" class="text-xs text-slate-600 no-print pt-2 text-right"></p>');
+      uploadSealedEdl(payload);
     }
+
+    // =====================================================================
+    //  DÉMARRAGE
+    // =====================================================================
+    INSPECTION_TEMPLATE = document.getElementById('step-inspection').innerHTML;
+    var _syncEl = document.getElementById('sync-status');
+    if (_syncEl) _syncEl.addEventListener('click', function () { if (!tenantsLoaded) loadTenantsFromServer(); });
+    loadTenantsFromServer();
   </script>
 </body>
 </html>
