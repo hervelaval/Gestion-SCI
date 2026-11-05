@@ -1,0 +1,8 @@
+{
+  "name": "edl-sci",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Gestion des états des lieux et suivi des locataires (SCI)",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" }
+}
